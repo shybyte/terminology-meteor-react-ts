@@ -21,3 +21,6 @@ insecure                # Allow all DB writes from clients (for prototyping)
 meteortypescript:typescript-libs
 react
 erasaur:meteor-lodash
+twbs:bootstrap
+less
+risul:chance

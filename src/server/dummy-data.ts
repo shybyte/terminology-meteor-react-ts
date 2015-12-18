@@ -1,12 +1,20 @@
+/// <reference path="../../typings/meteor-typescript-libs/meteor.d.ts" />
+/// <reference path="../../typings/chance.d.ts" />
+/// <reference path="../../typings/lodash.d.ts" />
+
+var _ = lodash as _.LoDashStatic;
+var chance = new Chance();
+
 Meteor.startup(function () {
-  if (Tasks.find().count() === 0) {
-    Tasks.insert({
-      text: "Hello Wold!",
-      createdAt:new Date()
+  //if (Entities.find().count() > 0) {
+  //  return;
+  //}
+
+  Entities.remove({});
+  _.range(10).forEach(i => {
+    Entities.insert({
+      name: chance.word(),
     });
-    Tasks.insert({
-      text: "Hola Mundo!",
-      createdAt:new Date()
-    });
-  }
+  });
+
 });

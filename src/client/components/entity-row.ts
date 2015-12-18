@@ -5,17 +5,17 @@ const div = React.DOM.div;
 
 interface HelloWorldProps {
   key: string;
-  task: any;
+  entity: Entity;
 }
 
 // Task component - represents a single todo item
-class Task extends React.Component<HelloWorldProps, {}> {
+class EntityRow extends React.Component<HelloWorldProps, {}> {
   render() {
     const p: HelloWorldProps = this.props;
     return (
-      div({}, p.task.text)
+      div({}, p.entity.name)
     );
   }
 }
 
-this.Task = Task
+this.EntityRow = EntityRow

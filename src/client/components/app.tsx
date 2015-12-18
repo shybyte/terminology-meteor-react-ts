@@ -2,19 +2,19 @@
 /// <reference path="../../../typings/meteor-hacks.d.ts" />
 
 interface AppMeteorData {
-  tasks: Task[]
+  entities: Entity[]
 }
 
 class AppComponent extends MeteorDataComponent<{},{}, AppMeteorData> implements GetMeteorDataInterface<AppMeteorData> {
-  getMeteorData()  {
+  getMeteorData() {
     return {
-      tasks: Tasks.find({}).fetch() as Task[]
+      entities: Entities.find({}).fetch()
     }
   }
 
-  renderTasks()  {
-    return this.data.tasks.map(task =>
-      <Task key={task._id} task={task}/>
+  renderEntities() {
+    return this.data.entities.map(entity =>
+      <EntityRow key={entity._id} entity={entity}/>
     );
   }
 
@@ -22,19 +22,17 @@ class AppComponent extends MeteorDataComponent<{},{}, AppMeteorData> implements 
     return (
       <div className="container">
         <header>
-          <h1>Todo List!!!</h1>
+          <h1>Terminology</h1>
         </header>
-
-        <ul>
-          {this.renderTasks()}
-        </ul>
+        <div>
+          {this.renderEntities()}
+        </div>
       </div>
     );
   }
 }
 
 
-var MyApp = mixinReactMeteorData(AppComponent);
-var myApp = React.createFactory(MyApp);
+const MyApp = mixinReactMeteorData(AppComponent);
 
 this.MyApp = MyApp;

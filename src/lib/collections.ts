@@ -1,10 +1,10 @@
 /// <reference path="../../typings/meteor-typescript-libs/meteor.d.ts" />
 
-interface Task {
-  _id: string
-  text: string
+interface Entity {
+  _id?: string
+  name: string
 }
 
-var Tasks = new Mongo.Collection("tasks");
+var Entities = new Mongo.Collection<Entity>("entities");
 
-this.Tasks = Tasks
+this.Entities = Entities;
