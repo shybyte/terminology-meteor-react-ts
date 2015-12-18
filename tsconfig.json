@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "noImplicitAny": true,
+    "outDir": ".",
+    "rootDir": "src",
+    "sourceMap": false,
+    "jsx": "preserve"
+  },
+  "exclude": [
+    ".meteor","typings"
+  ]
+}
