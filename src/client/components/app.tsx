@@ -2,6 +2,7 @@
 /// <reference path="../../../typings/meteor-hacks.d.ts" />
 
 interface AppMeteorData {
+  dataCategories: DataCategory[];
   entities: Entity[];
 }
 
@@ -15,23 +16,23 @@ interface AppState {
 class AppComponent extends MeteorDataComponent<{}, AppState, AppMeteorData> implements GetMeteorDataInterface<AppMeteorData> {
   getInitialState(): AppState {
     return {
-      filterText: 'tz',
-      limit: 20
+      filterText: '',
+      limit: 20,
     };
   }
 
   getMeteorData() {
     const s = this.state;
     return {
+      dataCategories: DataCategories.find({}, {sort: {name: 1}}).fetch(),
       entities: Entities.find(createNameFilter(s.filterText), {sort: {name: 1}, limit: s.limit}).fetch()
     };
   }
 
-  renderEntities() {
-    return this.data.entities.map(entity =>
-      <EntityRow key={entity._id} entity={entity}/>
-    );
+  getActiveColumns() {
+    return ['name', ...this.data.dataCategories.map(dc => dc.name)];
   }
+
 
   getFilterInputEl() {
     return this.refs['filter'] as HTMLInputElement;
@@ -64,10 +65,31 @@ class AppComponent extends MeteorDataComponent<{}, AppState, AppMeteorData> impl
           <h1>Terminology</h1>
         </header>
         <input ref="filter" value={this.state.filterText} onChange={onFilterChanged} onInput={onFilterChanged}/>
-        <div>
-          {this.renderEntities()}
-        </div>
+        <table className="table">
+          <thead>
+            <tr>
+              {this.renderTableHeader()}
+            </tr>
+          </thead>
+          <tbody>
+            {this.renderEntities()}
+          </tbody>
+        </table>
       </div>
+    );
+  }
+
+  renderTableHeader() {
+    return this.getActiveColumns().map(col =>
+      <th key={col}>
+        {col}
+      </th>
+    );
+  }
+
+  renderEntities() {
+    return this.data.entities.map(entity =>
+      <EntityRow key={entity._id} entity={entity} activeColumns={this.getActiveColumns()}/>
     );
   }
 }

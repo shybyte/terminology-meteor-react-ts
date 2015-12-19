@@ -11,12 +11,20 @@ namespace  server {
     //    return;
     // }
 
+    DataCategories.remove({});
+    ['title', 'description', 'notes'].map(name => ({name})).forEach(dataCategory => {
+      DataCategories.insert(dataCategory);
+    });
+
+    const dataCategories = DataCategories.find({}).fetch();
+
     Entities.remove({});
     _.range(1000).forEach(() => {
-      Entities.insert({
-        name: chance.word(),
-      });
+      const keyValuePairs = dataCategories.map(dc => [dc.name, dc.name + ' ' + chance.word()]);
+      Entities.insert(assign({name: chance.word()}, _.zipObject(keyValuePairs)));
     });
+
+
 
   });
 }

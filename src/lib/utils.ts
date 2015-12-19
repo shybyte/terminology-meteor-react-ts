@@ -40,3 +40,4 @@ function createNameFilter(filterText: string): any {
 this.MeteorDataComponent = MeteorDataComponent;
 this.mixinReactMeteorData = mixinReactMeteorData;
 this.createNameFilter = createNameFilter;
+this.assign = assign;

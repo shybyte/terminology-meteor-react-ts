@@ -1,16 +1,18 @@
 /// <reference path="../../../typings/react/react-global.d.ts" />
-const div = React.DOM.div;
+const tr = React.DOM.tr;
+const td = React.DOM.td;
 
-interface HelloWorldProps {
+interface EntityRowProps {
   key: string;
   entity: Entity;
+  activeColumns: string[];
 }
 
-class EntityRow extends React.Component<HelloWorldProps, {}> {
+class EntityRow extends React.Component<EntityRowProps, {}> {
   render() {
-    const p: HelloWorldProps = this.props;
+    const p: EntityRowProps = this.props;
     return (
-      div({}, p.entity.name)
+      tr({key: p.entity._id}, p.activeColumns.map(col => td({key: col}, p.entity[col])))
     );
   }
 }
