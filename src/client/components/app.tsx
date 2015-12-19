@@ -2,20 +2,20 @@
 /// <reference path="../../../typings/meteor-hacks.d.ts" />
 
 interface AppMeteorData {
-  entities: Entity[]
+  entities: Entity[];
 }
 
 interface AppState {
-  filterText?: string
-  subscription?: Meteor.SubscriptionHandle
-  limit?: number
+  filterText?: string;
+  subscription?: Meteor.SubscriptionHandle;
+  limit?: number;
 }
 
 
 class AppComponent extends MeteorDataComponent<{}, AppState, AppMeteorData> implements GetMeteorDataInterface<AppMeteorData> {
-  getInitialState() : AppState {
+  getInitialState(): AppState {
     return {
-      filterText: '',
+      filterText: 'tz',
       limit: 20
     };
   }
@@ -23,8 +23,8 @@ class AppComponent extends MeteorDataComponent<{}, AppState, AppMeteorData> impl
   getMeteorData() {
     const s = this.state;
     return {
-      entities: Entities.find(createNameFilter(s.filterText),{sort: {name: 1}, limit: s.limit}).fetch()
-    }
+      entities: Entities.find(createNameFilter(s.filterText), {sort: {name: 1}, limit: s.limit}).fetch()
+    };
   }
 
   renderEntities() {
@@ -34,7 +34,7 @@ class AppComponent extends MeteorDataComponent<{}, AppState, AppMeteorData> impl
   }
 
   getFilterInputEl() {
-    return this.refs['filter'] as HTMLInputElement
+    return this.refs['filter'] as HTMLInputElement;
   }
 
   onFilterChanged() {
@@ -47,7 +47,7 @@ class AppComponent extends MeteorDataComponent<{}, AppState, AppMeteorData> impl
     if (this.state.subscription) {
       this.state.subscription.stop();
     }
-    const subscription = Meteor.subscribe("entities", {nameFilterText: filterText, limit: this.state.limit});
+    const subscription = Meteor.subscribe('entities', {nameFilterText: filterText, limit: this.state.limit});
     this.setState({subscription});
   }
 

@@ -1,6 +1,4 @@
 /// <reference path="../../../typings/react/react-global.d.ts" />
-
-
 const div = React.DOM.div;
 
 interface HelloWorldProps {
@@ -8,7 +6,6 @@ interface HelloWorldProps {
   entity: Entity;
 }
 
-// Task component - represents a single todo item
 class EntityRow extends React.Component<HelloWorldProps, {}> {
   render() {
     const p: HelloWorldProps = this.props;
@@ -18,4 +15,4 @@ class EntityRow extends React.Component<HelloWorldProps, {}> {
   }
 }
 
-this.EntityRow = EntityRow
+this.EntityRow = EntityRow;
