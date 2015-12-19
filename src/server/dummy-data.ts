@@ -11,7 +11,7 @@ Meteor.startup(function () {
   //}
 
   Entities.remove({});
-  _.range(10).forEach(i => {
+  _.range(1000).forEach(() => {
     Entities.insert({
       name: chance.word(),
     });

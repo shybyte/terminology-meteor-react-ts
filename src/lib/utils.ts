@@ -23,5 +23,20 @@ class MeteorDataComponent<P,S,D> extends React.Component<P,S> {
   data: D
 }
 
+function escapeRegExp(str: string) {
+  return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+}
+
+function createNameFilter(filterText: string) : any{
+  if (!filterText) {
+    return {};
+  }
+  const filterRegexp = new RegExp('^'+escapeRegExp(filterText));
+  return {
+    name: filterRegexp
+  };
+}
+
 this.MeteorDataComponent = MeteorDataComponent;
 this.mixinReactMeteorData = mixinReactMeteorData;
+this.createNameFilter = createNameFilter;
