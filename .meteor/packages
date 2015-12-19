@@ -22,3 +22,5 @@ erasaur:meteor-lodash
 twbs:bootstrap
 less
 risul:chance
+meteorhacks:flow-router
+kadira:react-layout

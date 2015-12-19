@@ -33,12 +33,14 @@ http@1.1.1
 id-map@1.0.4
 jquery@1.11.4
 jsx@0.2.3
+kadira:react-layout@1.5.3
 launch-screen@1.0.4
 less@2.5.1
 livedata@1.0.15
 logging@1.0.8
 meteor@1.1.10
 meteor-base@1.0.1
+meteorhacks:flow-router@1.19.0
 meteortypescript:typescript-libs@1.2.8
 minifiers@1.1.7
 minimongo@1.0.10

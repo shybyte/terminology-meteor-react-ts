@@ -6,15 +6,15 @@ interface AppMeteorData {
   entities: Entity[];
 }
 
-interface AppState {
+interface EntityListState {
   filterText?: string;
   subscription?: Meteor.SubscriptionHandle;
   limit?: number;
 }
 
 
-class AppComponent extends MeteorDataComponent<{}, AppState, AppMeteorData> implements GetMeteorDataInterface<AppMeteorData> {
-  getInitialState(): AppState {
+class EntityListComponent extends MeteorDataComponent<{}, EntityListState, AppMeteorData> implements GetMeteorDataInterface<AppMeteorData> {
+  getInitialState(): EntityListState {
     return {
       filterText: '',
       limit: 20,
@@ -65,11 +65,8 @@ class AppComponent extends MeteorDataComponent<{}, AppState, AppMeteorData> impl
       width: columnWidth + '%'
     };
     return (
-      <div className="container">
-        <header>
-          <h1>Terminology</h1>
-        </header>
-        <input ref="filter" value={this.state.filterText} onChange={onFilterChanged} onInput={onFilterChanged}/>
+      <div>
+        <input ref="filter" className="form-control entityNameFilter" value={this.state.filterText} onChange={onFilterChanged} onInput={onFilterChanged} placeholder="Filter for name..."/>
         <table className="table">
           <colgroup>
             {activeColumns.map(ac => <col key={ac} span={1} style={columnStyle}/>)}
@@ -103,6 +100,6 @@ class AppComponent extends MeteorDataComponent<{}, AppState, AppMeteorData> impl
 }
 
 
-const MyApp = mixinReactMeteorData(AppComponent);
+const EntityList = mixinReactMeteorData(EntityListComponent);
 
-this.MyApp = MyApp;
+this.EntityList = EntityList;
