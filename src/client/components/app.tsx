@@ -59,6 +59,11 @@ class AppComponent extends MeteorDataComponent<{}, AppState, AppMeteorData> impl
 
   render() {
     const onFilterChanged = () => this.onFilterChanged();
+    const activeColumns = this.getActiveColumns();
+    const columnWidth = 100 / activeColumns.length;
+    const columnStyle = {
+      width: columnWidth + '%'
+    };
     return (
       <div className="container">
         <header>
@@ -66,6 +71,9 @@ class AppComponent extends MeteorDataComponent<{}, AppState, AppMeteorData> impl
         </header>
         <input ref="filter" value={this.state.filterText} onChange={onFilterChanged} onInput={onFilterChanged}/>
         <table className="table">
+          <colgroup>
+            {activeColumns.map(ac => <col key={ac} span={1} style={columnStyle}/>)}
+          </colgroup>
           <thead>
             <tr>
               {this.renderTableHeader()}
