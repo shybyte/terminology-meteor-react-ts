@@ -1,15 +1,30 @@
-interface EditEntityProps {
+/// <reference path="../../../../typings/react/react-global.d.ts" />
+/// <reference path="../../../../typings/meteor-hacks.d.ts" />
+
+interface EditEntityComponentProps {
   entityId: string;
 }
 
-class EditEntity extends React.Component<EditEntityProps, {}> {
-  render() {
-    return (
-      <div>
-        {this.props.entityId}
-      </div>
-    );
-  }
+interface EditEntityComponentData {
+  entity: Entity;
 }
 
+class EditEntityComponent extends MeteorDataComponent<EditEntityComponentProps, {}, EditEntityComponentData> implements GetMeteorDataInterface<EditEntityComponentData> {
+  getMeteorData() {
+    return {
+      entity: Entities.findOne(this.props.entityId)
+    };
+  }
+
+  componentDidMount() {
+    Meteor.subscribe('entity', {_id: this.props.entityId});
+  }
+
+  render() {
+    return <EntityCreateEdit entity={this.data.entity}/>;
+  }
+
+}
+
+const EditEntity = mixinReactMeteorData(EditEntityComponent);
 this.EditEntity = EditEntity;
