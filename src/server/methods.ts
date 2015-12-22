@@ -1,9 +1,10 @@
+
 const serverMethods: ServerMethods = {
   createEntity(entity: Entity) {
-    Entities.insert(entity);
+      EntitiesFacade.insert(entity);
   },
   saveEntity(entity: Entity) {
-    Entities.update(entity._id, entity);
+    EntitiesFacade.save(entity);
   },
 };
 

@@ -3,7 +3,8 @@
 interface Entity {
   _id?: string;
   name: string;
-  [key: string] : any;
+  _lowercase_name?: string;
+  [key: string]: any;
 }
 
 interface DataCategory {
@@ -13,7 +14,6 @@ interface DataCategory {
 
 const Entities = new Mongo.Collection<Entity>("entities");
 const DataCategories = new Mongo.Collection<DataCategory>("dataCategories");
-
 
 this.Entities = Entities;
 this.DataCategories = DataCategories;

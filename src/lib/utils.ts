@@ -31,9 +31,9 @@ function createNameFilter(filterText: string): any {
   if (!filterText) {
     return {};
   }
-  const filterRegexp = new RegExp('^' + escapeRegExp(filterText));
+  const filterRegexp = new RegExp('^' + escapeRegExp(filterText.toLowerCase()));
   return {
-    name: filterRegexp
+    _lowercase_name: filterRegexp
   };
 }
 

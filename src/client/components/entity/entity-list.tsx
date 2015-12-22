@@ -25,7 +25,7 @@ class EntityListComponent extends MeteorDataComponent<{}, EntityListState, Entit
     const s = this.state;
     return {
       dataCategories: DataCategories.find({}, {sort: {name: 1}}).fetch(),
-      entities: Entities.find(createNameFilter(s.filterText), {sort: {name: 1}, limit: s.limit}).fetch()
+      entities: Entities.find(createNameFilter(s.filterText), {sort: {_lowercase_name: 1}, limit: s.limit}).fetch()
     };
   }
 

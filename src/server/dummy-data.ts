@@ -20,7 +20,7 @@ namespace  server {
     Entities.remove({});
     _.range(1000).forEach(() => {
       const keyValuePairs = dataCategories.map(dc => [dc.name, dc.name + ' ' + chance.word()]);
-      Entities.insert(assign({name: chance.word()}, _.zipObject(keyValuePairs)));
+      EntitiesFacade.insert(assign({name: chance.word()}, _.zipObject(keyValuePairs)));
     });
 
 
