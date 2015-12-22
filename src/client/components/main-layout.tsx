@@ -2,10 +2,15 @@ function navItemClass(routeName: string) {
   return (routeName === FlowRouter.getRouteName()) ? 'active' : '';
 }
 
+function navItem(routeName: string, label: string) {
+  const url = FlowRouter.path(routeName);
+  return <li className={navItemClass(routeName)}>
+    <a href={url}>{label}</a>
+  </li>;
+}
 
 class MainLayout extends React.Component<{content: any}, {}> {
   render() {
-    const entityListUrl = FlowRouter.path('entityList');
     return (
       <div className="app">
         <header>
@@ -15,9 +20,8 @@ class MainLayout extends React.Component<{content: any}, {}> {
           <div className="row">
             <nav className="col-md-1">
               <ul className="nav nav-pills nav-stacked">
-                <li className={navItemClass('entityList')}>
-                  <a href={entityListUrl}>Overview</a>
-                </li>
+                {navItem('entityList', 'Overview')}
+                {navItem('entityCreate', 'New Term')}
               </ul>
             </nav>
             <main className="col-md-11">

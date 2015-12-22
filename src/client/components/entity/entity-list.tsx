@@ -1,7 +1,7 @@
-/// <reference path="../../../typings/react/react-global.d.ts" />
-/// <reference path="../../../typings/meteor-hacks.d.ts" />
+/// <reference path="../../../../typings/react/react-global.d.ts" />
+/// <reference path="../../../../typings/meteor-hacks.d.ts" />
 
-interface AppMeteorData {
+interface EntityListData {
   dataCategories: DataCategory[];
   entities: Entity[];
 }
@@ -13,7 +13,7 @@ interface EntityListState {
 }
 
 
-class EntityListComponent extends MeteorDataComponent<{}, EntityListState, AppMeteorData> implements GetMeteorDataInterface<AppMeteorData> {
+class EntityListComponent extends MeteorDataComponent<{}, EntityListState, EntityListData> implements GetMeteorDataInterface<EntityListData> {
   getInitialState(): EntityListState {
     return {
       filterText: '',

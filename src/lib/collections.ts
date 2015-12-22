@@ -14,5 +14,6 @@ interface DataCategory {
 const Entities = new Mongo.Collection<Entity>("entities");
 const DataCategories = new Mongo.Collection<DataCategory>("dataCategories");
 
+
 this.Entities = Entities;
 this.DataCategories = DataCategories;

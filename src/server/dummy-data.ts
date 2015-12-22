@@ -3,7 +3,6 @@
 /// <reference path="../../typings/lodash.d.ts" />
 
 namespace  server {
-  const _ = lodash as _.LoDashStatic;
   const chance = new Chance();
 
   Meteor.startup(function () {

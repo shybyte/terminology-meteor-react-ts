@@ -11,12 +11,22 @@ FlowRouter.route('/', {
 });
 
 
+
+
 FlowRouter.route('/edit/:entityId', {
   name: 'edit',
   action(params: any) {
     ReactLayout.render(MainLayout, {content: <EditEntity entityId={params.entityId} />});
   }
 });
+
+FlowRouter.route('/create/term', {
+  name: 'entityCreate',
+  action() {
+    ReactLayout.render(MainLayout, {content: <EntityCreate />});
+  }
+});
+
 
 FlowRouter.notFound = {
   action() {

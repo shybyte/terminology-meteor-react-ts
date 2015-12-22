@@ -1,6 +1,6 @@
 /// <reference path="../../typings/lodash.d.ts" />
 
-_ = lodash as _.LoDashStatic;
+_ = lodash;
 
 function assign<T1, T2>(t1: T1, t2: T2): T1 & T2 {
   return _.assign({} as T1, t1, t2) as (T1 & T2);
@@ -37,7 +37,13 @@ function createNameFilter(filterText: string): any {
   };
 }
 
+function isEmpty(s: string) {
+    return !s || s.trim() === '';
+}
+
 this.MeteorDataComponent = MeteorDataComponent;
 this.mixinReactMeteorData = mixinReactMeteorData;
 this.createNameFilter = createNameFilter;
 this.assign = assign;
+this.isEmpty = isEmpty;
+this._ = _;

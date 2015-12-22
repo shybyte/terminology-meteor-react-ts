@@ -1,4 +1,4 @@
-/// <reference path="../../../typings/react/react-global.d.ts" />
+/// <reference path="../../../../typings/react/react-global.d.ts" />
 const tr = React.DOM.tr;
 const td = React.DOM.td;
 const a = React.DOM.a;
