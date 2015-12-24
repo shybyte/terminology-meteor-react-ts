@@ -5,10 +5,12 @@ interface FieldCreateComponentProps {
 }
 
 interface FieldCreateData {
+  pickLists: PickList[];
   dataCategories: DataCategory[];
 }
 
 interface FieldCreateState {
+  type?: string;
   successMessage?: boolean;
   errorMessage?: string;
 }
@@ -17,12 +19,14 @@ interface FieldCreateState {
 class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps, FieldCreateState, FieldCreateData> implements GetMeteorDataInterface<FieldCreateData> {
   getInitialState(): FieldCreateState {
     return {
+      type: FIELD_TYPES.TEXT,
       successMessage: false
     };
   }
 
   getMeteorData() {
     return {
+      pickLists: PickLists.find({}).fetch(),
       dataCategories: DataCategories.find({}, {sort: {name: 1}}).fetch()
     };
   }
@@ -46,8 +50,10 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
   }
 
   getFormAsField(): DataCategory {
-    const name = (this.refs['name'] as HTMLInputElement).value;
-    return {name, type: FIELD_TYPES.TEXT};
+    const name = getRefValue(this, 'name');
+    const type = getRefValue(this, 'type');
+    const pickListId = getRefValue(this, 'pickListId');
+    return {name, type, pickListId};
   }
 
   onSubmit(ev: React.SyntheticEvent) {
@@ -70,6 +76,12 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
     return true;
   }
 
+  onChangeType() {
+    this.setState({
+      type: this.getFormAsField().type
+    });
+  }
+
   render() {
     const s = this.state;
     return (
@@ -77,15 +89,33 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
         <h2>Create New Field</h2>
         <form action="#" onSubmit={this.onSubmit}>
           <div className="form-group">
-            <label htmlFor="name">Field Name:</label>
+            <label htmlFor="name">Name:</label>
             <input ref="name" className="form-control" id="name" placeholder="Field Name" onInput={this.onNameInput}/>
           </div>
+          <div className="form-group">
+            <label htmlFor="type">Type:</label>
+            <select ref="type" className="form-control" id="type" onChange={this.onChangeType} value={s.type}>
+              <option value={FIELD_TYPES.TEXT}>Text</option>
+              <option value={FIELD_TYPES.PICK_LIST}>PickList</option>
+            </select>
+          </div>
+          {s.type === FIELD_TYPES.PICK_LIST ?  this.renderPickListSelector() : ''}
           {s.successMessage ? this.renderSuccessMessage() : ''}
           {s.errorMessage ? this.renderErrorMessage(s.errorMessage) : ''}
           <button className="btn btn-success">Create Field</button>
         </form>
       </div>
     );
+  }
+
+  renderPickListSelector() {
+    console.log(this.data.pickLists);
+    return <div className="form-group">
+      <label htmlFor="pickListId">Picklist:</label>
+      <select ref="pickListId" className="form-control" id="pickListId">
+        {this.data.pickLists.map(pickList => <option key={pickList._id} value={pickList._id}>{pickList.name}</option>)}
+      </select>
+    </div>;
   }
 
   renderSuccessMessage() {
