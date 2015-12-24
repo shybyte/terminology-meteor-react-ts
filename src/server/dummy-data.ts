@@ -5,13 +5,17 @@
 namespace  server {
   const chance = new Chance();
 
+  function getAllPickListItems(pickList: PickList): PickListItem[] {
+      return pickList.items;
+  }
+
   Meteor.startup(function () {
     // if (Entities.find().count() > 0) {
     //    return;
     // }
 
     PickLists.remove({});
-    PickLists.insert({
+    const domainPickListId = PickLists.insert({
       name: 'Domain',
       items: [
         {
@@ -29,8 +33,9 @@ namespace  server {
         }
       ]
     });
+    const domainPickList = PickLists.findOne(domainPickListId);
 
-    PickLists.insert({
+    const statusPickListId = PickLists.insert({
       name: 'Status',
       items: [
         {
@@ -43,20 +48,30 @@ namespace  server {
         }
       ]
     });
+    const statusPickList = PickLists.findOne(statusPickListId);
 
 
 
     DataCategories.remove({});
-    ['title', 'description', 'notes'].map(name => ({name})).forEach(dataCategory => {
+    ['description', 'notes'].map(name => ({name, type: FIELD_TYPES.TEXT})).forEach(dataCategory => {
       DataCategories.insert(dataCategory);
     });
 
-    const dataCategories = DataCategories.find({}).fetch();
+    DataCategories.insert({name: 'domain', type: FIELD_TYPES.PICK_LIST, pickListId: domainPickListId});
+    DataCategories.insert({name: 'status', type: FIELD_TYPES.PICK_LIST, pickListId: statusPickListId});
+
+    const domains = getAllPickListItems(domainPickList);
+    const states = getAllPickListItems(statusPickList);
 
     Entities.remove({});
     _.range(1000).forEach(() => {
-      const keyValuePairs = dataCategories.map(dc => [dc.name, dc.name + ' ' + chance.word()]);
-      EntitiesFacade.insert(assign({name: chance.word()}, _.zipObject(keyValuePairs)));
+      EntitiesFacade.insert({
+        name: chance.word(),
+        description: chance.sentence(),
+        notes: chance.sentence(),
+        domain: chance.pick(domains).name,
+        status: chance.pick(states).name
+      });
     });
 
 

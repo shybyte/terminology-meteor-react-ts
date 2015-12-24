@@ -14,7 +14,7 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
   }
 
   getActiveColumns() {
-    return ['name'];
+    return ['name', 'type', 'pickListId'];
   }
 
   private deleteField(field: DataCategory): any {
@@ -56,12 +56,16 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
 
   renderFields() {
     return this.data.dataCategories.map(field =>
-      <tr key={field._id}><td>{field.name} <button onClick={() => this.deleteField(field)}>Delete</button></td></tr>
+      <tr key={field._id}>
+        <td>{field.name}
+          <button onClick={() => this.deleteField(field)}>Delete</button>
+        </td>
+        <td>{field.type}</td>
+        <td>{field.pickListId ? PickLists.findOne(field.pickListId).name  :' '}</td>
+      </tr>
     );
   }
 }
-
-
 
 
 const FieldList = mixinReactMeteorData(FieldListComponent);

@@ -11,8 +11,15 @@ interface Entity extends MongoDBObject {
 }
 
 interface DataCategory extends MongoDBObject {
+  type: string; // FIELD_TYPES
   name: string;
+  pickListId?: string;
 }
+
+const FIELD_TYPES = {
+  TEXT: 'TEXT',
+  PICK_LIST: 'PICK_LIST'
+};
 
 interface PickList extends MongoDBObject {
   name: string;
@@ -39,3 +46,4 @@ this.Entities = Entities;
 this.DataCategories = DataCategories;
 this.PickLists = PickLists;
 this.COLLECTIONS = COLLECTIONS;
+this.FIELD_TYPES = FIELD_TYPES;

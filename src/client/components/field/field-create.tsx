@@ -39,9 +39,6 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
     }
   }
 
-  getAllFieldNames() {
-    return ['name'];
-  }
 
   onNameInput() {
     this.setState({successMessage: false});
@@ -49,9 +46,8 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
   }
 
   getFormAsField(): DataCategory {
-    const allFieldNames = this.getAllFieldNames();
-    const fieldValuePairs = allFieldNames.map(fieldName => [fieldName, (this.refs[fieldName] as HTMLInputElement).value]);
-    return _.zipObject(fieldValuePairs) as DataCategory;
+    const name = (this.refs['name'] as HTMLInputElement).value;
+    return {name, type: FIELD_TYPES.TEXT};
   }
 
   onSubmit(ev: React.SyntheticEvent) {
