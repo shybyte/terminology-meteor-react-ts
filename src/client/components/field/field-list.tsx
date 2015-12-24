@@ -7,7 +7,6 @@ interface FieldListData {
 
 
 class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> implements GetMeteorDataInterface<FieldListData> {
-
   getMeteorData() {
     return {
       dataCategories: DataCategories.find({}, {sort: {name: 1}}).fetch(),
@@ -18,6 +17,9 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
     return ['name'];
   }
 
+  private deleteField(field: DataCategory): any {
+    serverProxy.deleteField(field);
+  }
 
   render() {
     const activeColumns = this.getActiveColumns();
@@ -54,7 +56,7 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
 
   renderFields() {
     return this.data.dataCategories.map(field =>
-      <tr><td>{field.name}</td></tr>
+      <tr key={field._id}><td>{field.name} <button onClick={() => this.deleteField(field)}>Delete</button></td></tr>
     );
   }
 }

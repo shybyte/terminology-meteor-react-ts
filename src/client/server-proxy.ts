@@ -7,6 +7,9 @@ class ServerProxy implements ServerMethods {
 
   createField(field: DataCategory) {
   }
+
+  deleteField(field: DataCategory) {
+  }
 }
 
 function createServerProxy() {

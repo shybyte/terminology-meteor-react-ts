@@ -1,4 +1,3 @@
-
 const serverMethods: ServerMethods = {
   createEntity(entity: Entity) {
       EntitiesFacade.insert(entity);
@@ -8,6 +7,9 @@ const serverMethods: ServerMethods = {
   },
   createField(field: DataCategory) {
       DataCategories.insert(field);
+  },
+  deleteField(field: DataCategory) {
+      DataCategories.remove(field._id);
   },
 };
 
