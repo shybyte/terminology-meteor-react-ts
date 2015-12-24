@@ -38,7 +38,15 @@ function createNameFilter(filterText: string): any {
 }
 
 function isEmpty(s: string) {
-    return !s || s.trim() === '';
+  return !s || s.trim() === '';
+}
+
+function getRefValue(reactCompponent: React.Component<any, any>, ref: string) {
+  const refElement = reactCompponent.refs[ref];
+  if (!refElement) {
+    return undefined;
+  }
+  return (refElement as HTMLInputElement).value;
 }
 
 this.MeteorDataComponent = MeteorDataComponent;
@@ -47,3 +55,4 @@ this.createNameFilter = createNameFilter;
 this.assign = assign;
 this.isEmpty = isEmpty;
 this._ = _;
+this.getRefValue = getRefValue;
