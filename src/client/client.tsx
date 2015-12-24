@@ -1,4 +1,5 @@
 /// <reference path="../../typings/flow-router.d.ts" />
+/// <reference path="components/field/field-create.tsx" />
 
 
 Meteor.subscribe('dataCategories');
@@ -9,15 +10,6 @@ FlowRouter.route('/', {
     ReactLayout.render(MainLayout, {content: <EntityList />});
   }
 });
-
-FlowRouter.route('/fields', {
-  name: 'fieldList',
-  action() {
-    ReactLayout.render(MainLayout, {content: <FieldList />});
-  }
-});
-
-
 
 
 FlowRouter.route('/edit/:entityId', {
@@ -31,6 +23,21 @@ FlowRouter.route('/create/term', {
   name: 'entityCreate',
   action() {
     ReactLayout.render(MainLayout, {content: <EntityCreate />});
+  }
+});
+
+
+FlowRouter.route('/fields', {
+  name: 'fieldList',
+  action() {
+    ReactLayout.render(MainLayout, {content: <FieldList />});
+  }
+});
+
+FlowRouter.route('/create/field', {
+  name: 'fieldCreate',
+  action() {
+    ReactLayout.render(MainLayout, {content: <FieldCreate />});
   }
 });
 

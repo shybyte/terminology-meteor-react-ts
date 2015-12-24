@@ -6,6 +6,9 @@ const serverMethods: ServerMethods = {
   saveEntity(entity: Entity) {
     EntitiesFacade.save(entity);
   },
+  createField(field: DataCategory) {
+      DataCategories.insert(field);
+  },
 };
 
 Meteor.methods(serverMethods);

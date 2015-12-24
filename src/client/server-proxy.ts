@@ -4,6 +4,9 @@ class ServerProxy implements ServerMethods {
 
   saveEntity(e: Entity) {
   }
+
+  createField(field: DataCategory) {
+  }
 }
 
 function createServerProxy() {

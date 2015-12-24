@@ -23,6 +23,7 @@ class MainLayout extends React.Component<{content: any}, {}> {
                 {navItem('entityList', 'Overview')}
                 {navItem('entityCreate', 'New Term')}
                 {navItem('fieldList', 'Fields')}
+                {navItem('fieldCreate', 'New Field')}
               </ul>
             </nav>
             <main className="col-md-11">
