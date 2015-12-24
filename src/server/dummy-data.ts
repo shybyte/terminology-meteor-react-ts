@@ -10,6 +10,42 @@ namespace  server {
     //    return;
     // }
 
+    PickLists.remove({});
+    PickLists.insert({
+      name: 'Domain',
+      items: [
+        {
+          name: 'Animal',
+          items: [
+            {name: 'Insect', items: []},
+            {name: 'Fish', items: []},
+          ]
+        },
+        {
+          name: 'Plant',
+          items: [
+            {name: 'Tree', items: []}
+          ]
+        }
+      ]
+    });
+
+    PickLists.insert({
+      name: 'Status',
+      items: [
+        {
+          name: 'Preferred',
+          items: []
+        },
+        {
+          name: 'Deprecated',
+          items: []
+        }
+      ]
+    });
+
+
+
     DataCategories.remove({});
     ['title', 'description', 'notes'].map(name => ({name})).forEach(dataCategory => {
       DataCategories.insert(dataCategory);
@@ -22,7 +58,6 @@ namespace  server {
       const keyValuePairs = dataCategories.map(dc => [dc.name, dc.name + ' ' + chance.word()]);
       EntitiesFacade.insert(assign({name: chance.word()}, _.zipObject(keyValuePairs)));
     });
-
 
 
   });
