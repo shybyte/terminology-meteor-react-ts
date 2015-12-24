@@ -10,6 +10,13 @@ FlowRouter.route('/', {
   }
 });
 
+FlowRouter.route('/fields', {
+  name: 'fieldList',
+  action() {
+    ReactLayout.render(MainLayout, {content: <FieldList />});
+  }
+});
+
 
 
 

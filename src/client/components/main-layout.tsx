@@ -22,6 +22,7 @@ class MainLayout extends React.Component<{content: any}, {}> {
               <ul className="nav nav-pills nav-stacked">
                 {navItem('entityList', 'Overview')}
                 {navItem('entityCreate', 'New Term')}
+                {navItem('fieldList', 'Fields')}
               </ul>
             </nav>
             <main className="col-md-11">
