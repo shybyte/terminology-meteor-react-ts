@@ -30,7 +30,8 @@ class EntityListComponent extends MeteorDataComponent<{}, EntityListState, Entit
   }
 
   getActiveColumns() {
-    return ['name', ...this.data.dataCategories.map(dc => dc.name)];
+    const fieldColumns = this.data.dataCategories.map(dc => dc.name).concat(this.data.dataCategories.map(dc => dc.backwardName)).filter(_.isString);
+    return ['name'].concat(_.sortBy(fieldColumns));
   }
 
 

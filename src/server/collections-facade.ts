@@ -11,10 +11,13 @@ function pimpEntityForStorage(entity: Entity): Entity {
 
 class EntitiesFacade {
   static insert(e: Entity) {
-    Entities.insert(pimpEntityForStorage(e));
+    return Entities.insert(pimpEntityForStorage(e));
   }
   static save(e: Entity) {
-    Entities.update(e._id, pimpEntityForStorage(e));
+    return Entities.update(e._id, pimpEntityForStorage(e));
+  }
+  static update(_id: string, updateSpec: any) {
+    return Entities.update(_id, updateSpec);
   }
 }
 

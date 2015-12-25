@@ -5,7 +5,7 @@
 class EntityCreate extends React.Component<{}, {}> {
 
   render() {
-    const emptyEntity = {name: ''};
+    const emptyEntity: Entity = {name: ''};
     return <EntityCreateEdit entity={emptyEntity}/>;
   }
 }

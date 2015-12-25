@@ -6,7 +6,15 @@ namespace  server {
   const chance = new Chance();
 
   function getAllPickListItems(pickList: PickList): PickListItem[] {
-      return pickList.items;
+    return pickList.items;
+  }
+
+  function pick<T>(array: T[], number: number) {
+    if (array.length === 0 || number === 0) {
+      return [];
+    }
+    const result = chance.pick(array, number);
+    return Array.isArray(result) ? result : [result];
   }
 
   Meteor.startup(function () {
@@ -51,7 +59,6 @@ namespace  server {
     const statusPickList = PickLists.findOne(statusPickListId);
 
 
-
     DataCategories.remove({});
     ['description', 'notes'].map(name => ({name, type: FIELD_TYPES.TEXT})).forEach(dataCategory => {
       DataCategories.insert(dataCategory);
@@ -59,21 +66,38 @@ namespace  server {
 
     DataCategories.insert({name: 'domain', type: FIELD_TYPES.PICK_LIST, pickListId: domainPickListId});
     DataCategories.insert({name: 'status', type: FIELD_TYPES.PICK_LIST, pickListId: statusPickListId});
+    DataCategories.insert({name: 'eats', type: FIELD_TYPES.REFERENCE, backwardName: 'eaten_by'});
+    DataCategories.insert({name: 'similar', type: FIELD_TYPES.REFERENCE});
 
     const domains = getAllPickListItems(domainPickList);
     const states = getAllPickListItems(statusPickList);
 
     Entities.remove({});
+    const entityIds: string[] = [];
     _.range(1000).forEach(() => {
-      EntitiesFacade.insert({
+      const eatsIDs = pick(entityIds, chance.d4() - 1);
+      const eatsEntities = Entities.find({_id: {$in: eatsIDs}}).fetch();
+      const similarIDs = pick(entityIds, chance.d4() - 1);
+      const similarEntities = Entities.find({_id: {$in: similarIDs}}).fetch();
+      const id = EntitiesFacade.insert({
         name: chance.word(),
         description: chance.sentence(),
         notes: chance.sentence(),
         domain: chance.pick(domains).name,
-        status: chance.pick(states).name
+        status: chance.pick(states).name,
+        eats: eatsEntities.map(minifyEntity),
+        similar: similarIDs.map(minifyEntity)
+      });
+      const entity = Entities.findOne(id);
+      entityIds.push(id);
+
+      eatsEntities.forEach(refEntity => {
+        EntitiesFacade.update(refEntity._id, {$push: {eaten_by: minifyEntity(entity)}});
+      });
+
+      similarEntities.forEach(refEntity => {
+        EntitiesFacade.update(refEntity._id, {$push: {similar: minifyEntity(entity)}});
       });
     });
-
-
   });
 }

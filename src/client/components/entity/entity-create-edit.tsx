@@ -95,9 +95,10 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
 
     function renderField(dataCategory: DataCategory) {
       const fieldName = dataCategory.name;
+      const fieldValue = '' + entity[fieldName];
       return <div className="form-group" key={fieldName}>
         <label htmlFor={fieldName}>{fieldName}:</label>
-        <input ref={fieldName} className="form-control" id={fieldName} defaultValue={entity[fieldName]}/>
+        <input ref={fieldName} className="form-control" id={fieldName} defaultValue={fieldValue}/>
       </div>;
     }
 
