@@ -58,7 +58,7 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
     return this.data.dataCategories.map(field =>
       <tr key={field._id}>
         <td>{field.name}
-          <button onClick={() => this.deleteField(field)}>Delete</button>
+          <span className="glyphicon glyphicon-remove removeButton" title="Delete Field" onClick={() => this.deleteField(field)}> </span>
         </td>
         <td>{field.type}</td>
         <td>{field.pickListId ? PickLists.findOne(field.pickListId).name  :' '}</td>
