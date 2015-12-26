@@ -3,7 +3,7 @@ const serverMethods: ServerMethods = {
     EntitiesFacade.insert(entity);
   },
   updateEntity(_id: string, entity: Entity) {
-    EntitiesFacade.update(_id, {$set: entity});
+    EntitiesFacade.update(_id, entity);
   },
   createField(field: DataCategory) {
     DataCategories.insert(field);

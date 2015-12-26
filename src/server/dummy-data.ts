@@ -97,16 +97,7 @@ namespace  server {
         eats: eatsEntities.map(minifyEntity),
         similar: similarEntities.map(minifyEntity)
       });
-      const entity = Entities.findOne(id);
       entityIds.push(id);
-
-      eatsEntities.forEach(refEntity => {
-        EntitiesFacade.update(refEntity._id, {$push: {eaten_by: minifyEntity(entity)}});
-      });
-
-      similarEntities.forEach(refEntity => {
-        EntitiesFacade.update(refEntity._id, {$push: {similar: minifyEntity(entity)}});
-      });
     });
   });
 }
