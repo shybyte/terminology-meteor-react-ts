@@ -49,7 +49,7 @@ class EntityListComponent extends MeteorDataComponent<{}, EntityListState, Entit
     if (this.state.subscription) {
       this.state.subscription.stop();
     }
-    const subscription = Meteor.subscribe('entities', {nameFilterText: filterText, limit: this.state.limit});
+    const subscription = Meteor.subscribe(PUBLICATIONS.entities, {nameFilterText: filterText, limit: this.state.limit});
     this.setState({subscription});
   }
 

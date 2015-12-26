@@ -42,6 +42,11 @@ const COLLECTIONS = {
   pickLists: 'pickLists'
 };
 
+const PUBLICATIONS = assign(COLLECTIONS, {
+  entity: 'entity',
+  miniEntities: 'miniEntities',
+});
+
 const Entities = new Mongo.Collection<Entity>(COLLECTIONS.entities);
 const DataCategories = new Mongo.Collection<DataCategory>(COLLECTIONS.dataCategories);
 const PickLists = new Mongo.Collection<PickList>(COLLECTIONS.pickLists);
@@ -54,5 +59,6 @@ this.Entities = Entities;
 this.DataCategories = DataCategories;
 this.PickLists = PickLists;
 this.COLLECTIONS = COLLECTIONS;
+this.PUBLICATIONS = PUBLICATIONS;
 this.FIELD_TYPES = FIELD_TYPES;
 this.minifyEntity = minifyEntity;

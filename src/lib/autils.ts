@@ -1,5 +1,9 @@
 /// <reference path="../../typings/lodash.d.ts" />
 
+/**
+ * This file starts with "a" in order to be loaded by meteor first.
+ */
+
 _ = lodash;
 
 function assign<T1, T2>(t1: T1, t2: T2): T1 & T2 {

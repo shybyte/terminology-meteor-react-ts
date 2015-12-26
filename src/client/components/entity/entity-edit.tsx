@@ -17,7 +17,7 @@ class EditEntityComponent extends MeteorDataComponent<EditEntityComponentProps, 
   }
 
   componentDidMount() {
-    Meteor.subscribe('entity', {_id: this.props.entityId});
+    Meteor.subscribe(PUBLICATIONS.entity, {_id: this.props.entityId});
   }
 
   render() {

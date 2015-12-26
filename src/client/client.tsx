@@ -2,8 +2,8 @@
 /// <reference path="components/field/field-create.tsx" />
 
 
-Meteor.subscribe(COLLECTIONS.dataCategories);
-Meteor.subscribe(COLLECTIONS.pickLists);
+Meteor.subscribe(PUBLICATIONS.dataCategories);
+Meteor.subscribe(PUBLICATIONS.pickLists);
 
 FlowRouter.route('/', {
   name: 'entityList',

@@ -95,7 +95,7 @@ namespace  server {
         domain: chance.pick(domains).name,
         status: chance.pick(states).name,
         eats: eatsEntities.map(minifyEntity),
-        similar: similarIDs.map(minifyEntity)
+        similar: similarEntities.map(minifyEntity)
       });
       const entity = Entities.findOne(id);
       entityIds.push(id);

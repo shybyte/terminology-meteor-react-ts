@@ -16,6 +16,11 @@ interface EntityCreateEditState {
   modifiedFieldValues?: Entity;
 }
 
+interface MiniEntitySelectOption {
+  label: string;
+  value: string;
+  entity: MiniEntity;
+}
 
 class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComponentProps, EntityCreateEditState, EntityCreateEditData> implements GetMeteorDataInterface<EntityCreateEditData> {
   getInitialState(): EntityCreateEditState {
@@ -86,15 +91,39 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
     this.setFieldValue(field, option.value);
   }
 
+  onChangeReferences(field: DataCategory, options: MiniEntitySelectOption[]) {
+    console.log('onChangeReferences', options);
+    this.setFieldValue(field, options.map(o => o.entity));
+  }
+
   onChangeTextField(field: DataCategory, ev: React.SyntheticEvent) {
     const value = (ev.target as HTMLInputElement).value;
     this.setFieldValue(field, value);
   }
 
-  setFieldValue(field: {name: string}, value: string) {
+  setFieldValue(field: {name: string}, value: string | any[]) {
     this.setState({
       modifiedFieldValues: assign(this.state.modifiedFieldValues, {[field.name]: value})
     });
+  }
+
+  getReferencesOption(input: string, callback: Function) {
+    const limit = 10;
+    console.log('getReferencesOption:', input);
+    // This timeout prevents a not loading bug on page reload.
+    setTimeout(() => {
+      const subscription = Meteor.subscribe(PUBLICATIONS.miniEntities, {nameFilterText: input, limit}, () => {
+        const entities = Entities.find(createNameFilter(input), {sort: {_lowercase_name: 1}, limit}).fetch();
+        console.log('getReferencesOption result:', entities);
+        const options: MiniEntitySelectOption []= entities.map(e => ({
+          value: e._id,
+          label: e.name,
+          entity: e
+        }));
+        callback(null, {options});
+        subscription.stop();
+      });
+    }, 1);
   }
 
   render() {
@@ -114,7 +143,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
 
     function renderFieldInput(field: DataCategory) {
       const fieldName = field.name;
-      const fieldValue = self.state.modifiedFieldValues[fieldName] || (entity[fieldName] ? '' + entity[fieldName] : '');
+      const fieldValue = self.state.modifiedFieldValues[fieldName] || entity[fieldName];
       switch (field.type) {
         case FIELD_TYPES.TEXT:
           const onChange = (ev: React.SyntheticEvent) => self.onChangeTextField(field, ev);
@@ -130,7 +159,21 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
             onChange={(option: PickListSelectOption) => self.onChangePickListItem(field, option)}
           />;
         case FIELD_TYPES.REFERENCE:
-          return <input ref={fieldName} className="form-control" id={fieldName} defaultValue={fieldValue as string}/>;
+          const references = fieldValue as MiniEntity[] || [];
+          console.log('references:', references);
+          const selectedOptions = references.map(e => ({
+            label: e.name,
+            value: e._id,
+            entity: e
+          }));
+          return <Select.Async
+            id={fieldName}
+            multi={true}
+            name={fieldName}
+            value={selectedOptions}
+            loadOptions={self.getReferencesOption}
+            onChange={(options: any) => self.onChangeReferences(field, options)}
+          />;
       }
     }
 
