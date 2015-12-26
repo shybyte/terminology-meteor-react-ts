@@ -1,5 +1,6 @@
 /// <reference path="../../../../typings/react/react-global.d.ts" />
 /// <reference path="../../../../typings/meteor-hacks.d.ts" />
+/// <reference path="../../../../typings/react-select.d.ts" />
 
 interface EntityCreateEditComponentProps {
   entity: Entity;
@@ -12,13 +13,15 @@ interface EntityCreateEditData {
 interface EntityCreateEditState {
   successMessage?: boolean;
   errorMessage?: string;
+  modifiedFieldValues?: Entity;
 }
 
 
 class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComponentProps, EntityCreateEditState, EntityCreateEditData> implements GetMeteorDataInterface<EntityCreateEditData> {
   getInitialState(): EntityCreateEditState {
     return {
-      successMessage: false
+      successMessage: false,
+      modifiedFieldValues: {}
     };
   }
 
@@ -45,14 +48,9 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
   }
 
   onNameInput() {
+    this.setFieldValue({name: 'name'}, (this.refs['name'] as HTMLInputElement).value);
     this.setState({successMessage: false});
     this.validate();
-  }
-
-  getFormAsEntity(): Entity {
-    const allFieldNames = this.getAllFieldNames();
-    const fieldValuePairs = allFieldNames.map(fieldName => [fieldName, (this.refs[fieldName] as HTMLInputElement).value]);
-    return _.zipObject(fieldValuePairs) as Entity;
   }
 
   onSubmit(ev: React.SyntheticEvent) {
@@ -61,18 +59,18 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
       return;
     }
     if (this.isNew()) {
-      serverProxy.createEntity(this.getFormAsEntity());
+      serverProxy.createEntity(assign(this.props.entity, this.state.modifiedFieldValues));
       this.setState({successMessage: true});
       this.getNameInputEl().value = '';
     } else {
-      serverProxy.saveEntity(assign({_id: this.props.entity._id}, this.getFormAsEntity()));
+      serverProxy.updateEntity(this.props.entity._id, this.state.modifiedFieldValues);
       FlowRouter.go('entityList');
     }
   }
 
   validate(): boolean {
-    const newEntity = this.getFormAsEntity();
-    if (isEmpty(newEntity.name)) {
+    const entity = assign(this.props.entity, this.state.modifiedFieldValues);
+    if (isEmpty(entity.name)) {
       this.setState({errorMessage: 'A term needs a surface...'});
       return false;
     }
@@ -84,7 +82,23 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
     return !this.props.entity._id;
   }
 
+  onChangePickListItem(field: DataCategory, option: PickListSelectOption) {
+    this.setFieldValue(field, option.value);
+  }
+
+  onChangeTextField(field: DataCategory, ev: React.SyntheticEvent) {
+    const value = (ev.target as HTMLInputElement).value;
+    this.setFieldValue(field, value);
+  }
+
+  setFieldValue(field: {name: string}, value: string) {
+    this.setState({
+      modifiedFieldValues: assign(this.state.modifiedFieldValues, {[field.name]: value})
+    });
+  }
+
   render() {
+    const self = this;
     const s = this.state;
     const entity = this.props.entity;
     if (!entity) {
@@ -93,18 +107,45 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
 
     const isNew = this.isNew();
 
+    function renderPickListItem(option: PickListSelectOption) {
+      const paddingLeft = option.level * 10 + 'px';
+      return <span style={{ paddingLeft: paddingLeft }}>{option.label}</span>;
+    }
+
+    function renderFieldInput(field: DataCategory) {
+      const fieldName = field.name;
+      const fieldValue = self.state.modifiedFieldValues[fieldName] || (entity[fieldName] ? '' + entity[fieldName] : '');
+      switch (field.type) {
+        case FIELD_TYPES.TEXT:
+          const onChange = (ev: React.SyntheticEvent) => self.onChangeTextField(field, ev);
+          return <input ref={fieldName} className="form-control" id={fieldName} value={fieldValue as string}
+                        onInput={onChange} onChange={onChange}/>;
+        case FIELD_TYPES.PICK_LIST:
+          const options = createSelectOptionsFromPickList(PickLists.findOne(field.pickListId));
+          return <Select
+            name={fieldName}
+            value={fieldValue}
+            options={options}
+            optionRenderer={renderPickListItem}
+            onChange={(option: PickListSelectOption) => self.onChangePickListItem(field, option)}
+          />;
+        case FIELD_TYPES.REFERENCE:
+          return <input ref={fieldName} className="form-control" id={fieldName} defaultValue={fieldValue as string}/>;
+      }
+    }
+
     function renderField(dataCategory: DataCategory) {
       const fieldName = dataCategory.name;
-      const fieldValue = '' + entity[fieldName];
       return <div className="form-group" key={fieldName}>
         <label htmlFor={fieldName}>{fieldName}:</label>
-        <input ref={fieldName} className="form-control" id={fieldName} defaultValue={fieldValue}/>
+        {renderFieldInput(dataCategory)}
       </div>;
     }
 
     const title = isNew ? 'Create New Term' : `Edit Term "${this.props.entity.name}"`;
+
     return (
-      <div>
+      <div className="editEntity">
         <h2>{title}</h2>
         <form action="#" onSubmit={this.onSubmit}>
           <div className="form-group">

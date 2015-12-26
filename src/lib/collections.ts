@@ -5,7 +5,7 @@ interface MongoDBObject {
 }
 
 interface MiniEntity extends MongoDBObject {
-  name: string;
+  name?: string;
 }
 
 interface Entity extends MiniEntity {

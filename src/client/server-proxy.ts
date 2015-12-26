@@ -2,7 +2,7 @@ class ServerProxy implements ServerMethods {
   createEntity(e: Entity) {
   }
 
-  saveEntity(e: Entity) {
+  updateEntity(_id: string, e: Entity) {
   }
 
   createField(field: DataCategory) {

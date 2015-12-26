@@ -8,16 +8,21 @@ function pimpEntityForStorage(entity: Entity): Entity {
   return e;
 }
 
+function pimpUpdateSpecForStorage(updateSpec: any) {
+  if (updateSpec.$set) {
+    return assign(updateSpec, {$set: pimpEntityForStorage(updateSpec.$set)});
+  } else {
+    return pimpEntityForStorage(updateSpec);
+  }
+}
+
 
 class EntitiesFacade {
   static insert(e: Entity) {
     return Entities.insert(pimpEntityForStorage(e));
   }
-  static save(e: Entity) {
-    return Entities.update(e._id, pimpEntityForStorage(e));
-  }
   static update(_id: string, updateSpec: any) {
-    return Entities.update(_id, updateSpec);
+    return Entities.update(_id, pimpUpdateSpecForStorage(updateSpec));
   }
 }
 

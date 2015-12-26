@@ -1,15 +1,15 @@
 const serverMethods: ServerMethods = {
   createEntity(entity: Entity) {
-      EntitiesFacade.insert(entity);
+    EntitiesFacade.insert(entity);
   },
-  saveEntity(entity: Entity) {
-    EntitiesFacade.save(entity);
+  updateEntity(_id: string, entity: Entity) {
+    EntitiesFacade.update(_id, {$set: entity});
   },
   createField(field: DataCategory) {
-      DataCategories.insert(field);
+    DataCategories.insert(field);
   },
   deleteField(field: DataCategory) {
-      DataCategories.remove(field._id);
+    DataCategories.remove(field._id);
   },
 };
 

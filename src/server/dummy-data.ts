@@ -30,7 +30,16 @@ namespace  server {
           name: 'Animal',
           items: [
             {name: 'Insect', items: []},
-            {name: 'Fish', items: []},
+            {
+              name: 'Fish', items: [
+              {
+                name: 'Shark',
+                items: [],
+              }, {
+                name: 'Clownfish',
+                items: [],
+              }]
+            },
           ]
         },
         {
