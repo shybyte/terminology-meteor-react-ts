@@ -22,15 +22,41 @@ function forEachRefField(entity: Entity, f: (referencedEntityIDs: string [], fie
   });
 }
 
+function updateNameInReferences(modifiedEntity: Entity, referencesIds: string [], fieldName: string, backwardName: string) {
+  updateEntityRef(referencesIds, backwardName, modifiedEntity);
+  if (fieldName !== backwardName) {
+    const referencesToMe = getReferencedIds(modifiedEntity, backwardName);
+    updateEntityRef(referencesToMe, fieldName, modifiedEntity);
+  }
+}
+
+function updateEntityRef(entityIDs: string[], fieldName: string, updatedEntity: Entity) {
+  removeEntityRef(entityIDs, fieldName, updatedEntity._id);
+  addEntityRef(entityIDs, fieldName, updatedEntity);
+}
+
+function removeEntityRef(entityIDs: string[], fieldName: string, entityID: string) {
+  Entities.update(
+    {_id: {$in: entityIDs}},
+    {$pull: {[fieldName]: {_id: entityID}}},
+    {multi: true}
+  );
+}
+
+function addEntityRef(entityIDs: string[], fieldName: string, newEntityReference: Entity) {
+  Entities.update(
+    {_id: {$in: entityIDs}},
+    {$addToSet: {[fieldName]: minifyEntity(newEntityReference)}},
+    {multi: true}
+  );
+}
+
 class EntitiesFacade {
   static insert(e: Entity) {
     const entityId = Entities.insert(pimpEntityForStorage(e));
     const entity = Entities.findOne(entityId);
     forEachRefField(entity, (referencedEntityIDs, fieldName, backwardName) => {
-      Entities.update(
-        {_id: {$in: referencedEntityIDs}},
-        {$push: {[backwardName]: minifyEntity(entity)}}
-      );
+      addEntityRef(referencedEntityIDs, backwardName, entity);
     });
     return entityId;
   }
@@ -41,17 +67,14 @@ class EntitiesFacade {
     Entities.update(_id, {$set: pimpedUpdateSpec});
     const modifiedEntity = Entities.findOne(_id);
     forEachRefField(modifiedEntity, (newReferencedEntityIDs, fieldName, backwardName) => {
+      if (oldEntity.name != modifiedEntity.name) {
+        updateNameInReferences(modifiedEntity, newReferencedEntityIDs, fieldName, backwardName);
+      }
       const oldReferencedEntityIDs = getReferencedIds(oldEntity, fieldName);
       const addedIds = _.without(newReferencedEntityIDs, ...oldReferencedEntityIDs);
-      Entities.update(
-        {_id: {$in: addedIds}},
-        {$addToSet: {[backwardName]: minifyEntity(modifiedEntity)}}
-      );
+      addEntityRef(addedIds, backwardName, modifiedEntity);
       const removedIds = _.without(oldReferencedEntityIDs, ...newReferencedEntityIDs);
-      Entities.update(
-        {_id: {$in: removedIds}},
-        {$pull: {[backwardName]: minifyEntity(modifiedEntity)}}
-      );
+      removeEntityRef(removedIds, backwardName, modifiedEntity._id);
     });
   }
 }
