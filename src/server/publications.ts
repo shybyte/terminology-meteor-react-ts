@@ -1,6 +1,7 @@
 Meteor.publish(PUBLICATIONS.entities, (parameters: any = {}) => {
   const mongoNameSelector = createNameSelector(parameters.nameFilterText);
-  const mongoFieldSelector = createMongoSelector(parameters.fieldFilters);
+  const pickLists = PickLists.find({}).fetch();
+  const mongoFieldSelector = createMongoSelector(parameters.fieldFilters, pickLists);
   // console.log(parameters, JSON.stringify(mongoFieldSelector));
   const mongoSelector = assign(mongoNameSelector, mongoFieldSelector);
   return Entities.find(mongoSelector, {sort: {_lowercase_name: 1}, limit: parameters.limit || 5});

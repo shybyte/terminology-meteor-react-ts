@@ -5,12 +5,6 @@
 namespace  server {
   const chance = new Chance();
 
-  function getAllPickListItems(pickList: PickList): PickListItem[] {
-    return _.flatten(pickList.items.map(pickListItem => {
-      return pickList.items.concat(getAllPickListItems(pickListItem));
-    }));
-  }
-
   function pick<T>(array: T[], number: number) {
     if (array.length === 0 || number === 0) {
       return [];
@@ -81,12 +75,12 @@ namespace  server {
     DataCategories.insert({name: 'eats', type: FIELD_TYPES.REFERENCE, backwardName: 'eaten_by'});
     DataCategories.insert({name: 'similar', type: FIELD_TYPES.REFERENCE});
 
-    const domains = getAllPickListItems(domainPickList);
-    const states = getAllPickListItems(statusPickList);
+    const domains = getDescendantPickListItems(domainPickList);
+    const states = getDescendantPickListItems(statusPickList);
 
     Entities.remove({});
     const entityIds: string[] = [];
-    _.range(1000).forEach(() => {
+    _.range(100).forEach(() => {
       const eatsIDs = pick(entityIds, chance.d4() - 1);
       const eatsEntities = Entities.find({_id: {$in: eatsIDs}}).fetch();
       const similarIDs = pick(entityIds, chance.d4() - 1);

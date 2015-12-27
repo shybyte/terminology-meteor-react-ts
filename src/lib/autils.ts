@@ -41,7 +41,32 @@ function createNameSelector(filterText: string): Mongo.Selector {
   };
 }
 
-function createMongoSelector(filters?: EntityFilter[]): Mongo.Selector {
+function getDescendantPickListItems(pickList: PickListItem): PickListItem[] {
+  if (!pickList) {
+    return [];
+  }
+  return _.flatten(pickList.items.map(pickListItem => {
+    return [pickListItem].concat(getDescendantPickListItems(pickListItem));
+  }));
+}
+
+function getPickListItem(pickList: PickList, name: string, level = 0): PickListItem {
+  if (!pickList) {
+    return undefined;
+  }
+  if (level > 0 && pickList.name === name) {
+    return pickList;
+  }
+  for (const pickListItem of pickList.items) {
+    const childResult = getPickListItem(pickListItem, name, level + 1);
+    if (childResult) {
+      return childResult;
+    }
+  }
+  return undefined;
+}
+
+function createMongoSelector(filters: EntityFilter[], pickLists: PickList[]): Mongo.Selector {
   if (!filters) {
     return {};
   }
@@ -49,8 +74,17 @@ function createMongoSelector(filters?: EntityFilter[]): Mongo.Selector {
     if (filter.values.length === 0) {
       return undefined;
     }
+    const pickList = _.find(pickLists, pl => pl._id === filter.field.pickListId);
     return {
-      [filter.field.name]: {$in: filter.values}
+      [filter.field.name]: {
+        $in: _.unique(_.flatten(filter.values.map(filterValue => {
+          const pickListItem = getPickListItem(pickList, filterValue);
+          if (!pickListItem) {
+            return [];
+          }
+          return [pickListItem].concat(getDescendantPickListItems(pickListItem));
+        })).map(plItem => plItem.name))
+      }
     };
   }));
   if (selectorsToAnd.length === 0) {
@@ -63,8 +97,8 @@ function isEmpty(s: string) {
   return !s || s.trim() === '';
 }
 
-function getRefValue(reactCompponent: React.Component<any, any>, ref: string) {
-  const refElement = reactCompponent.refs[ref];
+function getRefValue(reactComponent: React.Component<any, any>, ref: string) {
+  const refElement = reactComponent.refs[ref];
   if (!refElement) {
     return undefined;
   }
@@ -86,3 +120,4 @@ this._ = _;
 this.getRefValue = getRefValue;
 this.swap = swap;
 this.createMongoSelector = createMongoSelector;
+this.getDescendantPickListItems = getDescendantPickListItems;

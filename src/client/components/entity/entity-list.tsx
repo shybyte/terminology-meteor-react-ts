@@ -26,9 +26,13 @@ class EntityListComponent extends MeteorDataComponent<{}, EntityListState, Entit
 
   getMeteorData() {
     const s = this.state;
+    const pickLists = PickLists.find({}).fetch();
     return {
       dataCategories: DataCategories.find({}, {sort: {name: 1}}).fetch(),
-      entities: Entities.find(assign(createNameSelector(s.filterText), createMongoSelector(s.filters)), {sort: {_lowercase_name: 1}, limit: s.limit}).fetch()
+      entities: Entities.find(assign(createNameSelector(s.filterText), createMongoSelector(s.filters, pickLists)), {
+        sort: {_lowercase_name: 1},
+        limit: s.limit
+      }).fetch()
     };
   }
 
@@ -123,7 +127,7 @@ class EntityListComponent extends MeteorDataComponent<{}, EntityListState, Entit
       width: columnWidth + '%'
     };
     return (
-      <div>
+      <div className="entityList">
         <div className="flexRow">
           <input ref="filter" className="form-control entityNameFilter" value={this.state.filterText}
                  onChange={onNameFilterChanged} onInput={onNameFilterChanged} placeholder="Filter for name..."/>
