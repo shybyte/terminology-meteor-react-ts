@@ -31,7 +31,7 @@ class FilterBarComponent extends MeteorDataComponent<FilterBarProps, {}, FilterB
     ev.preventDefault();
     console.log(field);
     this.props.addFilter({
-      id: _.uniqueId(),
+      id: _.uniqueId(Date.now() + '-'),
       field,
       values: []
     });
@@ -42,10 +42,12 @@ class FilterBarComponent extends MeteorDataComponent<FilterBarProps, {}, FilterB
     this.props.changeFilter(filter);
   }
 
+
   render() {
     const pickListFields = this.data.fields.filter(f => f.type === FIELD_TYPES.PICK_LIST);
     return <div className="filterBar">
       {this.props.filters.map((filter,i) => <FilterBarItem key={i + ''} filter={filter}
+                                                           pickLists={this.data.pickLists}
                                                            changeFilter={this.onFilterChanged}
                                                            removeFilter={this.props.removeFilter}/>)}
 
@@ -69,11 +71,13 @@ class FilterBarComponent extends MeteorDataComponent<FilterBarProps, {}, FilterB
   }
 }
 
+
 interface FilterBarItemProps {
   key: string;
   filter: EntityFilter;
   changeFilter(filter: EntityFilter): void;
   removeFilter(filter: EntityFilter): void;
+  pickLists: PickList[];
 }
 
 class FilterBarItem extends React.Component<FilterBarItemProps, {}> {
@@ -91,7 +95,11 @@ class FilterBarItem extends React.Component<FilterBarItemProps, {}> {
   render() {
     const p = this.props;
     const field = p.filter.field;
-    const options = createSelectOptionsFromPickList(PickLists.findOne(field.pickListId));
+    const pickList = _.find(p.pickLists, {_id: field.pickListId});
+    if (!pickList) {
+      return <div className="filterBarItem">Loading...</div>;
+    }
+    const options = createSelectOptionsFromPickList(pickList);
     return <div className="filterBarItem">
       <label>{field.name}</label>
       <Select

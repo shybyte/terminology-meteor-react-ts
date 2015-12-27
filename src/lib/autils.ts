@@ -31,7 +31,7 @@ function escapeRegExp(str: string) {
   return str.replace(/[\-\[\]\/\{}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
 
-function createNameFilter(filterText: string): any {
+function createNameSelector(filterText: string): Mongo.Selector {
   if (!filterText) {
     return {};
   }
@@ -39,6 +39,24 @@ function createNameFilter(filterText: string): any {
   return {
     _lowercase_name: filterRegexp
   };
+}
+
+function createMongoSelector(filters?: EntityFilter[]): Mongo.Selector {
+  if (!filters) {
+    return {};
+  }
+  const selectorsToAnd = _.compact(filters.map(filter => {
+    if (filter.values.length === 0) {
+      return undefined;
+    }
+    return {
+      [filter.field.name]: {$in: filter.values}
+    };
+  }));
+  if (selectorsToAnd.length === 0) {
+    return {};
+  }
+  return {$and: selectorsToAnd};
 }
 
 function isEmpty(s: string) {
@@ -61,9 +79,10 @@ function swap<T>(x: T, f: (x: T) => void) {
 
 this.MeteorDataComponent = MeteorDataComponent;
 this.mixinReactMeteorData = mixinReactMeteorData;
-this.createNameFilter = createNameFilter;
+this.createNameSelector = createNameSelector;
 this.assign = assign;
 this.isEmpty = isEmpty;
 this._ = _;
 this.getRefValue = getRefValue;
 this.swap = swap;
+this.createMongoSelector = createMongoSelector;

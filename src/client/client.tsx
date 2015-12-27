@@ -2,13 +2,21 @@
 /// <reference path="components/field/field-create.tsx" />
 
 
-Meteor.subscribe(PUBLICATIONS.dataCategories);
-Meteor.subscribe(PUBLICATIONS.pickLists);
+const fieldsSubscription = Meteor.subscribe(PUBLICATIONS.dataCategories);
+const pickListsSubscription = Meteor.subscribe(PUBLICATIONS.pickLists);
 
 FlowRouter.route('/', {
   name: 'entityList',
   action() {
-    ReactLayout.render(MainLayout, {content: <EntityList />});
+    function renderIfReady() {
+      if (fieldsSubscription.ready() && pickListsSubscription.ready()) {
+        ReactLayout.render(MainLayout, {content: <EntityList />});
+      } else {
+        setTimeout(renderIfReady, 10);
+      }
+    }
+
+    renderIfReady();
   }
 });
 
@@ -16,7 +24,7 @@ FlowRouter.route('/', {
 FlowRouter.route('/edit/:entityId', {
   name: 'edit',
   action(params: any) {
-    ReactLayout.render(MainLayout, {content: <EditEntity entityId={params.entityId} />});
+    ReactLayout.render(MainLayout, {content: <EditEntity entityId={params.entityId}/>});
   }
 });
 

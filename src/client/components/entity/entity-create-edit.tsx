@@ -113,7 +113,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
     // This timeout prevents a not loading bug on page reload.
     setTimeout(() => {
       const subscription = Meteor.subscribe(PUBLICATIONS.miniEntities, {nameFilterText: input, limit}, () => {
-        const entities = Entities.find(createNameFilter(input), {sort: {_lowercase_name: 1}, limit}).fetch();
+        const entities = Entities.find(createNameSelector(input), {sort: {_lowercase_name: 1}, limit}).fetch();
         console.log('getReferencesOption result:', entities);
         const options: MiniEntitySelectOption []= entities.map(e => ({
           value: e._id,
