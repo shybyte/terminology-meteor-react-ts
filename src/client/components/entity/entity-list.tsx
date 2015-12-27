@@ -10,14 +10,17 @@ interface EntityListState {
   filterText?: string;
   subscription?: Meteor.SubscriptionHandle;
   limit?: number;
+  filters?: EntityFilter[];
 }
 
+const FILTER_KEY = 'filter';
 
 class EntityListComponent extends MeteorDataComponent<{}, EntityListState, EntityListData> implements GetMeteorDataInterface<EntityListData> {
   getInitialState(): EntityListState {
     return {
       filterText: '',
       limit: 20,
+      filters: []
     };
   }
 
@@ -58,7 +61,42 @@ class EntityListComponent extends MeteorDataComponent<{}, EntityListState, Entit
     this.updateSubscription(this.state.filterText);
   }
 
+  addFilter(filter: EntityFilter) {
+    this.setState({
+      filters: this.state.filters.concat(filter)
+    });
+
+  }
+
+   componentWillUpdate(props: {}, state: EntityListState) {
+     this.saveFilter(state.filters);
+   }
+
+  componentWillMount() {
+    this.setState({filters: JSON.parse(localStorage.getItem(FILTER_KEY) || '[]')});
+  }
+
+  changeFilter(changedFilter: EntityFilter) {
+    this.setState({
+      filters: this.state.filters.map(filter => {
+        return (filter.id === changedFilter.id) ? changedFilter : filter;
+      })
+    });
+  }
+
+  saveFilter(filters: EntityFilter[]) {
+    console.log(filters);
+    localStorage.setItem(FILTER_KEY, JSON.stringify(filters));
+  }
+
+  removeFilter(filterToRemove: EntityFilter) {
+    this.setState({
+      filters: this.state.filters.filter(filter => filter.id !== filterToRemove.id)
+    });
+  }
+
   render() {
+    const s = this.state;
     const onFilterChanged = () => this.onFilterChanged();
     const activeColumns = this.getActiveColumns();
     const columnWidth = 100 / activeColumns.length;
@@ -67,7 +105,12 @@ class EntityListComponent extends MeteorDataComponent<{}, EntityListState, Entit
     };
     return (
       <div>
-        <input ref="filter" className="form-control entityNameFilter" value={this.state.filterText} onChange={onFilterChanged} onInput={onFilterChanged} placeholder="Filter for name..."/>
+        <div className="flexRow">
+          <input ref="filter" className="form-control entityNameFilter" value={this.state.filterText}
+                 onChange={onFilterChanged} onInput={onFilterChanged} placeholder="Filter for name..."/>
+          <FilterBar filters={s.filters} addFilter={this.addFilter} changeFilter={this.changeFilter}
+                     removeFilter={this.removeFilter}/>
+        </div>
         <table className="table">
           <colgroup>
             {activeColumns.map(ac => <col key={ac} span={1} style={columnStyle}/>)}

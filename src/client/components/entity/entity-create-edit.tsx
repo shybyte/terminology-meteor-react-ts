@@ -136,11 +136,6 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
 
     const isNew = this.isNew();
 
-    function renderPickListItem(option: PickListSelectOption) {
-      const paddingLeft = option.level * 10 + 'px';
-      return <span style={{ paddingLeft: paddingLeft }}>{option.label}</span>;
-    }
-
     function renderFieldInput(field: DataCategory) {
       const fieldName = field.name;
       const fieldValue = self.state.modifiedFieldValues[fieldName] || entity[fieldName];

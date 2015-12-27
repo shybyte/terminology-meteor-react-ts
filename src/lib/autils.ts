@@ -53,6 +53,12 @@ function getRefValue(reactCompponent: React.Component<any, any>, ref: string) {
   return (refElement as HTMLInputElement).value;
 }
 
+function swap<T>(x: T, f: (x: T) => void) {
+  const xClone = _.clone(x);
+  f(xClone);
+  return Object.freeze(xClone);
+}
+
 this.MeteorDataComponent = MeteorDataComponent;
 this.mixinReactMeteorData = mixinReactMeteorData;
 this.createNameFilter = createNameFilter;
@@ -60,3 +66,4 @@ this.assign = assign;
 this.isEmpty = isEmpty;
 this._ = _;
 this.getRefValue = getRefValue;
+this.swap = swap;
