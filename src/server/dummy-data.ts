@@ -6,7 +6,9 @@ namespace  server {
   const chance = new Chance();
 
   function getAllPickListItems(pickList: PickList): PickListItem[] {
-    return pickList.items;
+    return _.flatten(pickList.items.map(pickListItem => {
+      return pickList.items.concat(getAllPickListItems(pickListItem));
+    }));
   }
 
   function pick<T>(array: T[], number: number) {
@@ -16,6 +18,7 @@ namespace  server {
     const result = chance.pick(array, number);
     return Array.isArray(result) ? result : [result];
   }
+
 
   Meteor.startup(function () {
     // if (Entities.find().count() > 0) {
