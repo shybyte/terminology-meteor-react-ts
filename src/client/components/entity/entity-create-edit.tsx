@@ -148,7 +148,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
           const options = createSelectOptionsFromPickList(PickLists.findOne(field.pickListId));
           return <Select
             name={fieldName}
-            value={field.multi ? fieldValue : fieldValue[0]}
+            value={field.multi ? fieldValue : (fieldValue ? fieldValue[0] : undefined)}
             multi={field.multi}
             options={options}
             optionRenderer={renderPickListItem}
