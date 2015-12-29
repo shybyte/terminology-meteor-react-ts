@@ -161,7 +161,7 @@ class EntityListComponent extends MeteorDataComponent<{}, EntityListState, Entit
 
   renderEntities() {
     return this.data.entities.map(entity =>
-      <EntityRow key={entity._id} entity={entity} activeColumns={this.getActiveColumns()}/>
+      <EntityRow key={entity._id} entity={entity} activeColumns={this.getActiveColumns()} fields={this.data.dataCategories}/>
     );
   }
 }

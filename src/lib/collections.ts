@@ -15,6 +15,7 @@ interface Entity extends MiniEntity {
 
 interface DataCategory extends MongoDBObject {
   type: string; // FIELD_TYPES
+  multi: boolean;
   name: string;
   backwardName?: string;  // used for references
   pickListId?: string;

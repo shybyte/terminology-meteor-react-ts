@@ -66,31 +66,35 @@ namespace  server {
 
 
     DataCategories.remove({});
-    ['description', 'notes'].map(name => ({name, type: FIELD_TYPES.TEXT})).forEach(dataCategory => {
+    ['description', 'notes'].map(name => ({
+      name,
+      type: FIELD_TYPES.TEXT,
+      multi: false
+    })).forEach(dataCategory => {
       DataCategories.insert(dataCategory);
     });
 
-    DataCategories.insert({name: 'domain', type: FIELD_TYPES.PICK_LIST, pickListId: domainPickListId});
-    DataCategories.insert({name: 'status', type: FIELD_TYPES.PICK_LIST, pickListId: statusPickListId});
-    DataCategories.insert({name: 'eats', type: FIELD_TYPES.REFERENCE, backwardName: 'eaten_by'});
-    DataCategories.insert({name: 'similar', type: FIELD_TYPES.REFERENCE});
+    DataCategories.insert({name: 'domain', multi: true, type: FIELD_TYPES.PICK_LIST, pickListId: domainPickListId});
+    DataCategories.insert({name: 'status', multi: false, type: FIELD_TYPES.PICK_LIST, pickListId: statusPickListId});
+    DataCategories.insert({name: 'eats', multi: true, type: FIELD_TYPES.REFERENCE, backwardName: 'eaten_by'});
+    DataCategories.insert({name: 'similar', multi: true, type: FIELD_TYPES.REFERENCE});
 
     const domains = getDescendantPickListItems(domainPickList);
     const states = getDescendantPickListItems(statusPickList);
 
     Entities.remove({});
     const entityIds: string[] = [];
-    _.range(100).forEach(() => {
+    _.range(200).forEach(() => {
       const eatsIDs = pick(entityIds, chance.d4() - 1);
       const eatsEntities = Entities.find({_id: {$in: eatsIDs}}).fetch();
       const similarIDs = pick(entityIds, chance.d4() - 1);
-      const similarEntities = Entities.find({_id: {$in: similarIDs}}).fetch();
+      const similarEntities =  Entities.find({_id: {$in: similarIDs}}).fetch();
       const id = EntitiesFacade.insert({
         name: chance.word(),
         description: chance.sentence(),
         notes: chance.sentence(),
-        domain: chance.pick(domains).name,
-        status: chance.pick(states).name,
+        domain: pick(domains, chance.d4() - 1).map(f => f.name),
+        status: [chance.pick(states).name],
         eats: eatsEntities.map(minifyEntity),
         similar: similarEntities.map(minifyEntity)
       });

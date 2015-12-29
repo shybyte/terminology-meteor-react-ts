@@ -14,7 +14,7 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
   }
 
   getActiveColumns() {
-    return ['name', 'type', 'pickListId'];
+    return ['name', 'type', 'multi', 'pickListId'];
   }
 
   private deleteField(field: DataCategory): any {
@@ -58,9 +58,11 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
     return this.data.dataCategories.map(field =>
       <tr key={field._id}>
         <td>{field.name}
-          <span className="glyphicon glyphicon-remove removeButton" title="Delete Field" onClick={() => this.deleteField(field)}> </span>
+          <span className="glyphicon glyphicon-remove removeButton" title="Delete Field"
+                onClick={() => this.deleteField(field)}></span>
         </td>
         <td>{field.type}</td>
+        <td>{field.multi ? 'multi' : ''}</td>
         <td>{field.pickListId ? PickLists.findOne(field.pickListId).name  :' '}</td>
       </tr>
     );

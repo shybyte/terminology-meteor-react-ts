@@ -97,12 +97,26 @@ function isEmpty(s: string) {
   return !s || s.trim() === '';
 }
 
-function getRefValue(reactComponent: React.Component<any, any>, ref: string) {
-  const refElement = reactComponent.refs[ref];
+
+function getRefInputElement(reactComponent: React.Component<any, any>, ref: string) {
+  return reactComponent.refs[ref] as HTMLInputElement;
+}
+
+
+function getRefValue(reactComponent: React.Component<any, any>, ref: string)  {
+  const refElement = getRefInputElement(reactComponent, ref);
   if (!refElement) {
     return undefined;
   }
-  return (refElement as HTMLInputElement).value;
+  return refElement.value;
+}
+
+function getCheckBoxRefValue(reactComponent: React.Component<any, any>, ref: string)  {
+  const refElement = getRefInputElement(reactComponent, ref);
+  if (!refElement) {
+    return undefined;
+  }
+  return refElement.checked;
 }
 
 function swap<T>(x: T, f: (x: T) => void) {
@@ -121,3 +135,4 @@ this.getRefValue = getRefValue;
 this.swap = swap;
 this.createMongoSelector = createMongoSelector;
 this.getDescendantPickListItems = getDescendantPickListItems;
+this.getCheckBoxRefValue = getCheckBoxRefValue;

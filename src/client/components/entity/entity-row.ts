@@ -9,25 +9,47 @@ interface EntityRowProps {
   key: string;
   entity: Entity;
   activeColumns: string[];
+  fields: DataCategory[];
 }
 
 class EntityRow extends React.Component<EntityRowProps, {}> {
 
   renderCell(colName: string): any {
-    const {entity} = this.props;
+    const {entity, fields} = this.props;
     const value = entity[colName];
+
+    if (!value) {
+        return '';
+    }
+
     if (colName === 'name') {
       return a({href: FlowRouter.path('edit', {entityId: entity._id})}, value);
-    } else if (Array.isArray(value)) {
-      const values = value as any[];
-      return ul({},
-        values.map((e, i) =>
-          li({key: i + ''},
-            a({href: FlowRouter.path('edit', {entityId: e._id})}, e.name)
-          )
-        ));
-    } else {
-      return value;
+    }
+
+    const field = _.find(fields, f => f.name === colName || f.backwardName === colName);
+
+    if (!field) {
+      return 'nofield';
+    }
+
+    switch (field.type) {
+      case FIELD_TYPES.PICK_LIST:
+        const values = value as any[];
+        return ul({},
+          values.map((value, i) =>
+            li({key: i + ''}, value + '')
+          ));
+      case FIELD_TYPES.REFERENCE:
+        const refValues = value as any[];
+        return ul({},
+          refValues.map((e, i) =>
+            li({key: i + ''},
+              a({href: FlowRouter.path('edit', {entityId: e._id})}, e.name)
+            )
+          ));
+      case FIELD_TYPES.TEXT:
+      default:
+        return value;
     }
   }
 

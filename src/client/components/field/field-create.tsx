@@ -53,7 +53,8 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
     const name = getRefValue(this, 'name');
     const type = getRefValue(this, 'type');
     const pickListId = getRefValue(this, 'pickListId');
-    return {name, type, pickListId};
+    const multi = getCheckBoxRefValue(this, 'multi');
+    return {name, type, pickListId, multi};
   }
 
   onSubmit(ev: React.SyntheticEvent) {
@@ -99,6 +100,7 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
               <option value={FIELD_TYPES.PICK_LIST}>PickList</option>
             </select>
           </div>
+          {s.type === FIELD_TYPES.PICK_LIST ?  this.renderMultiCheckBox() : ''}
           {s.type === FIELD_TYPES.PICK_LIST ?  this.renderPickListSelector() : ''}
           {s.successMessage ? this.renderSuccessMessage() : ''}
           {s.errorMessage ? this.renderErrorMessage(s.errorMessage) : ''}
@@ -106,6 +108,15 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
         </form>
       </div>
     );
+  }
+
+  renderMultiCheckBox() {
+    return <div className="checkbox">
+      <label>
+        <input ref="multi" type="checkbox"/>
+        Multiple Values
+      </label>
+    </div>;
   }
 
   renderPickListSelector() {

@@ -87,8 +87,8 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
     return !this.props.entity._id;
   }
 
-  onChangePickListItem(field: DataCategory, option: PickListSelectOption) {
-    this.setFieldValue(field, option.value);
+  onChangePickListItem(field: DataCategory, option: PickListSelectOption | PickListSelectOption[]) {
+    this.setFieldValue(field, Array.isArray(option) ? option.map(o => o.value) : [option.value]);
   }
 
   onChangeReferences(field: DataCategory, options: MiniEntitySelectOption[]) {
@@ -115,7 +115,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
       const subscription = Meteor.subscribe(PUBLICATIONS.miniEntities, {nameFilterText: input, limit}, () => {
         const entities = Entities.find(createNameSelector(input), {sort: {_lowercase_name: 1}, limit}).fetch();
         console.log('getReferencesOption result:', entities);
-        const options: MiniEntitySelectOption []= entities.map(e => ({
+        const options: MiniEntitySelectOption [] = entities.map(e => ({
           value: e._id,
           label: e.name,
           entity: e
@@ -148,7 +148,8 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
           const options = createSelectOptionsFromPickList(PickLists.findOne(field.pickListId));
           return <Select
             name={fieldName}
-            value={fieldValue}
+            value={field.multi ? fieldValue : fieldValue[0]}
+            multi={field.multi}
             options={options}
             optionRenderer={renderPickListItem}
             onChange={(option: PickListSelectOption) => self.onChangePickListItem(field, option)}
