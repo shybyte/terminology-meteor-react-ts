@@ -95,7 +95,8 @@ namespace  server {
       const eatsEntities = eatsIDs.map(id => miniEntityById[id]);
       const similarIDs = pick(entityIds, chance.d4() - 1);
       const similarEntities = similarIDs.map(id => miniEntityById[id]);
-      const newEntityData: Entity = {
+      const newEntityData: EntityInsert = {
+        type: chance.pick([ENTITY_TYPES.C, ENTITY_TYPES.T]),
         name: chance.word(),
         description: chance.pick(dummySentences),
         notes: chance.pick(dummySentences),

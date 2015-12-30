@@ -1,6 +1,10 @@
 /// <reference path="../../../../typings/react/react-global.d.ts" />
 /// <reference path="../../../../typings/meteor-hacks.d.ts" />
 
+interface EntityListProps {
+  type: string; // ENTITY_TYPES
+}
+
 interface EntityListData {
   dataCategories: DataCategory[];
   entities: Entity[];
@@ -15,7 +19,7 @@ interface EntityListState {
 
 const FILTER_KEY = 'filter';
 
-class EntityListComponent extends MeteorDataComponent<{}, EntityListState, EntityListData> implements GetMeteorDataInterface<EntityListData> {
+class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityListState, EntityListData> implements GetMeteorDataInterface<EntityListData> {
   getInitialState(): EntityListState {
     return {
       filterText: '',
@@ -29,7 +33,7 @@ class EntityListComponent extends MeteorDataComponent<{}, EntityListState, Entit
     const pickLists = PickLists.find({}).fetch();
     return {
       dataCategories: DataCategories.find({}, {sort: {name: 1}}).fetch(),
-      entities: Entities.find(assign(createNameSelector(s.filterText), createMongoSelector(s.filters, pickLists)), {
+      entities: Entities.find(assign(assign(createNameSelector(s.filterText), createMongoSelector(s.filters, pickLists)), {type: this.props.type}), {
         sort: {_lowercase_name: 1},
         limit: s.limit
       }).fetch()
@@ -49,16 +53,17 @@ class EntityListComponent extends MeteorDataComponent<{}, EntityListState, Entit
   onNameFilterChanged() {
     const filterText = this.getFilterInputEl().value.trim();
     this.setState({filterText});
-    this.updateSubscription(filterText, this.state.filters);
+    this.updateSubscription(filterText, this.state.filters, this.props.type);
   }
 
-  updateSubscription(filterText: string, filters: EntityFilter[]) {
+  updateSubscription(filterText: string, filters: EntityFilter[], type: string) {
     if (this.state.subscription) {
       this.state.subscription.stop();
     }
     const subscription = Meteor.subscribe(PUBLICATIONS.entities, {
       nameFilterText: filterText,
       fieldFilters: filters,
+      type: type,
       limit: this.state.limit
     });
     this.setState({subscription});
@@ -66,7 +71,7 @@ class EntityListComponent extends MeteorDataComponent<{}, EntityListState, Entit
 
   componentDidMount() {
     this.getFilterInputEl().focus();
-    this.updateSubscription(this.state.filterText, this.state.filters);
+    this.updateSubscription(this.state.filterText, this.state.filters, this.props.type);
   }
 
   addFilter(filter: EntityFilter) {
@@ -76,13 +81,15 @@ class EntityListComponent extends MeteorDataComponent<{}, EntityListState, Entit
   }
 
   onFilterChanged(newFilter: EntityFilter[]) {
-    this.updateSubscription(this.state.filterText, newFilter);
+    this.updateSubscription(this.state.filterText, newFilter, this.props.type);
   }
 
-  componentWillUpdate(props: {}, newState: EntityListState) {
+  componentWillUpdate(newProps: EntityListProps, newState: EntityListState) {
     if (this.state.filters !== newState.filters) {
       this.saveFilter(newState.filters);
       this.onFilterChanged(newState.filters);
+    } else if (newProps !== this.props) {
+      this.updateSubscription(this.state.filterText, this.state.filters, newProps.type);
     }
   }
 
@@ -161,7 +168,8 @@ class EntityListComponent extends MeteorDataComponent<{}, EntityListState, Entit
 
   renderEntities() {
     return this.data.entities.map(entity =>
-      <EntityRow key={entity._id} entity={entity} activeColumns={this.getActiveColumns()} fields={this.data.dataCategories}/>
+      <EntityRow key={entity._id} entity={entity} activeColumns={this.getActiveColumns()}
+                 fields={this.data.dataCategories}/>
     );
   }
 }

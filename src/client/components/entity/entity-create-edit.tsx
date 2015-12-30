@@ -3,7 +3,7 @@
 /// <reference path="../../../../typings/react-select.d.ts" />
 
 interface EntityCreateEditComponentProps {
-  entity: Entity;
+  entity: EntityInsert;
 }
 
 interface EntityCreateEditData {
@@ -13,7 +13,7 @@ interface EntityCreateEditData {
 interface EntityCreateEditState {
   successMessage?: boolean;
   errorMessage?: string;
-  modifiedFieldValues?: Entity;
+  modifiedFieldValues?: EntityUpdate;
 }
 
 interface MiniEntitySelectOption {
@@ -69,7 +69,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
       this.getNameInputEl().value = '';
     } else {
       serverProxy.updateEntity(this.props.entity._id, this.state.modifiedFieldValues);
-      FlowRouter.go('entityList');
+      FlowRouter.go(ROUTE_NAMES.termList);
     }
   }
 

@@ -1,6 +1,6 @@
 /// <reference path="../../typings/meteor-typescript-libs/meteor.d.ts" />
 
-function pimpEntityForStorage(entity: Entity): Entity {
+function pimpEntityForStorage(entity: EntityUpdate): EntityUpdate {
   const e = _.clone(entity);
   if (e.name) {
     e._lowercase_name = e.name.toLowerCase();
@@ -52,8 +52,8 @@ function addEntityRef(entityIDs: string[], fieldName: string, newEntityReference
 }
 
 class EntitiesFacade {
-  static insert(e: Entity, options: {refFields?: DataCategory[]} = {}) {
-    const pimpedEntityData = pimpEntityForStorage(e);
+  static insert(e: EntityInsert, options: {refFields?: DataCategory[]} = {}) {
+    const pimpedEntityData = pimpEntityForStorage(e) as Entity;
     const entityId = Entities.insert(pimpedEntityData);
     const entity = assign(pimpedEntityData, {_id: entityId});
     forEachRefField(entity, (referencedEntityIDs, fieldName, backwardName) => {

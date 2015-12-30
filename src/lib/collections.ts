@@ -5,13 +5,35 @@ interface MongoDBObject {
 }
 
 interface MiniEntity extends MongoDBObject {
-  name?: string;
+  name: string;
 }
 
-interface Entity extends MiniEntity {
+interface EntityUpdate extends MongoDBObject {
+  name?: string;
+  type?: string;
   _lowercase_name?: string;
   [key: string]: string | string[] | MiniEntity[];
 }
+
+interface EntityInsert extends EntityUpdate {
+  name: string;
+  type: string;
+  [key: string]: string | string[] | MiniEntity[];
+}
+
+interface Entity extends EntityInsert {
+  _id: string;
+  type: string;
+  name: string;
+  _lowercase_name: string;
+  [key: string]: string | string[] | MiniEntity[];
+}
+
+const ENTITY_TYPES = {
+  C: 'C', // Concept
+  T: 'T'  // Term
+};
+
 
 interface DataCategory extends MongoDBObject {
   type: string; // FIELD_TYPES
@@ -52,7 +74,7 @@ const Entities = new Mongo.Collection<Entity>(COLLECTIONS.entities);
 const DataCategories = new Mongo.Collection<DataCategory>(COLLECTIONS.dataCategories);
 const PickLists = new Mongo.Collection<PickList>(COLLECTIONS.pickLists);
 
-function minifyEntity(e: Entity): MiniEntity {
+function minifyEntity(e: {_id: string, name: string}): MiniEntity {
   return {_id: e._id, name: e.name};
 }
 
@@ -62,4 +84,5 @@ this.PickLists = PickLists;
 this.COLLECTIONS = COLLECTIONS;
 this.PUBLICATIONS = PUBLICATIONS;
 this.FIELD_TYPES = FIELD_TYPES;
+this.ENTITY_TYPES = ENTITY_TYPES;
 this.minifyEntity = minifyEntity;
