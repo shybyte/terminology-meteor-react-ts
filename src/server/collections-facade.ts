@@ -13,8 +13,8 @@ function getReferencedIds(entity: Entity, fieldName: string) {
   return referencedEntities.map(e => e._id);
 }
 
-function forEachRefField(entity: Entity, f: (referencedEntityIDs: string [], fieldName: string, backwardName: string) => void) {
-  const refFields = DataCategories.find({type: FIELD_TYPES.REFERENCE}).fetch();
+function forEachRefField(entity: Entity, f: (referencedEntityIDs: string [], fieldName: string, backwardName: string) => void, options: {refFields?: DataCategory[]} = {}) {
+  const refFields = options.refFields || DataCategories.find({type: FIELD_TYPES.REFERENCE}).fetch();
   refFields.forEach(field => {
     const referencedEntityIDs = getReferencedIds(entity, field.name);
     const backwardName = field.backwardName || field.name;
@@ -52,12 +52,13 @@ function addEntityRef(entityIDs: string[], fieldName: string, newEntityReference
 }
 
 class EntitiesFacade {
-  static insert(e: Entity) {
-    const entityId = Entities.insert(pimpEntityForStorage(e));
-    const entity = Entities.findOne(entityId);
+  static insert(e: Entity, options: {refFields?: DataCategory[]} = {}) {
+    const pimpedEntityData = pimpEntityForStorage(e);
+    const entityId = Entities.insert(pimpedEntityData);
+    const entity = assign(pimpedEntityData, {_id: entityId});
     forEachRefField(entity, (referencedEntityIDs, fieldName, backwardName) => {
       addEntityRef(referencedEntityIDs, backwardName, entity);
-    });
+    }, options);
     return entityId;
   }
 
