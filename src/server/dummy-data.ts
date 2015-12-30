@@ -78,27 +78,36 @@ namespace  server {
     DataCategories.insert({name: 'status', multi: false, type: FIELD_TYPES.PICK_LIST, pickListId: statusPickListId});
     DataCategories.insert({name: 'eats', multi: true, type: FIELD_TYPES.REFERENCE, backwardName: 'eaten_by'});
     DataCategories.insert({name: 'similar', multi: true, type: FIELD_TYPES.REFERENCE});
+    const refFields = DataCategories.find({type: FIELD_TYPES.REFERENCE}).fetch();
 
     const domains = getDescendantPickListItems(domainPickList);
     const states = getDescendantPickListItems(statusPickList);
 
     Entities.remove({});
+    const start = Date.now();
+    console.log('Adding dummy entities...');
+    const dummySentences = _.range(40).map(() => chance.sentence());
+    const dummyDomainSets = _.range(40).map(() => pick(domains, chance.d4() - 1).map(f => f.name));
     const entityIds: string[] = [];
-    _.range(200).forEach(() => {
+    const miniEntityById: {[key: string] : MiniEntity} = {};
+    _.range(100).forEach(() => {
       const eatsIDs = pick(entityIds, chance.d4() - 1);
-      const eatsEntities = Entities.find({_id: {$in: eatsIDs}}).fetch();
+      const eatsEntities = eatsIDs.map(id => miniEntityById[id]);
       const similarIDs = pick(entityIds, chance.d4() - 1);
-      const similarEntities =  Entities.find({_id: {$in: similarIDs}}).fetch();
-      const id = EntitiesFacade.insert({
+      const similarEntities = similarIDs.map(id => miniEntityById[id]);
+      const newEntityData: Entity = {
         name: chance.word(),
-        description: chance.sentence(),
-        notes: chance.sentence(),
-        domain: pick(domains, chance.d4() - 1).map(f => f.name),
+        description: chance.pick(dummySentences),
+        notes: chance.pick(dummySentences),
+        domain: chance.pick(dummyDomainSets),
         status: [chance.pick(states).name],
-        eats: eatsEntities.map(minifyEntity),
-        similar: similarEntities.map(minifyEntity)
-      });
+        eats: eatsEntities,
+        similar: similarEntities
+      };
+      const id = EntitiesFacade.insert(newEntityData, {refFields});
       entityIds.push(id);
+      miniEntityById[id] = minifyEntity(assign(newEntityData, {_id: id}));
     });
+    console.log('Time for adding dummy entities11: ', Date.now() - start);
   });
 }
