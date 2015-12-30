@@ -9,7 +9,7 @@ function pimpEntityForStorage(entity: Entity): Entity {
 }
 
 function getReferencedIds(entity: Entity, fieldName: string) {
-  const referencedEntities = entity[fieldName] as MiniEntity[];
+  const referencedEntities = (entity[fieldName] || []) as MiniEntity[];
   return referencedEntities.map(e => e._id);
 }
 
