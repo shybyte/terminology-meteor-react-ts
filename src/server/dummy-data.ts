@@ -71,13 +71,15 @@ namespace  server {
       name: 'description',
       type: FIELD_TYPES.TEXT,
       entityTypes: [ENTITY_TYPES.C],
-      multi: false
+      multi: false,
+      system: false,
     });
     DataCategories.insert({
       name: 'notes',
       type: FIELD_TYPES.TEXT,
       entityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
-      multi: false
+      multi: false,
+      system: false,
     });
 
     DataCategories.insert({
@@ -85,27 +87,31 @@ namespace  server {
       entityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
       multi: true,
       type: FIELD_TYPES.PICK_LIST,
-      pickListId: domainPickListId
+      pickListId: domainPickListId,
+      system: false,
     });
     DataCategories.insert({
       name: 'status',
       entityTypes: [ENTITY_TYPES.T],
       multi: false,
       type: FIELD_TYPES.PICK_LIST,
-      pickListId: statusPickListId
+      pickListId: statusPickListId,
+      system: false,
     });
     DataCategories.insert({
       name: 'eats',
       entityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
       multi: true,
       type: FIELD_TYPES.REFERENCE,
-      backwardName: 'eaten_by'
+      backwardName: 'eaten_by',
+      system: false,
     });
     DataCategories.insert({
       name: 'similar',
       entityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
       multi: true,
-      type: FIELD_TYPES.REFERENCE
+      type: FIELD_TYPES.REFERENCE,
+      system: false,
     });
 
     DataCategories.insert(TERMS_REFERENCE);

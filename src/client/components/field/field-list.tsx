@@ -58,8 +58,7 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
     return this.data.dataCategories.map(field =>
       <tr key={field._id}>
         <td>{field.name}
-          <span className="glyphicon glyphicon-remove removeButton" title="Delete Field"
-                onClick={() => this.deleteField(field)}></span>
+          {field.system ? '' : this.renderDeleteButton(field)}
         </td>
         <td>{field.type}</td>
         <td>{field.multi ? 'multi' : ''}</td>
@@ -67,6 +66,12 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
       </tr>
     );
   }
+
+  renderDeleteButton(field: DataCategory) {
+    return <span className="glyphicon glyphicon-remove removeButton" title="Delete Field"
+                 onClick={() => this.deleteField(field)}></span>;
+  }
+
 }
 
 

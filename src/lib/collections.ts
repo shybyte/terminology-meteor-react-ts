@@ -37,6 +37,7 @@ const ENTITY_TYPES = {
 
 interface DataCategory extends MongoDBObject {
   type: string; // FIELD_TYPES
+  system: boolean;
   multi: boolean;
   name: string;
   entityTypes: string[];
@@ -70,7 +71,8 @@ const TERMS_REFERENCE = Object.freeze({
   multi: true,
   backwardMulti: false,
   type: FIELD_TYPES.REFERENCE,
-  backwardName: 'concept'
+  backwardName: 'concept',
+  system: true,
 });
 
 const COLLECTIONS = {
