@@ -7,7 +7,12 @@ const pickListsSubscription = Meteor.subscribe(PUBLICATIONS.pickLists);
 
 const ROUTE_NAMES = {
   termList: 'termList',
-  conceptList: 'conceptList'
+  termEdit: 'edit',
+  conceptList: 'conceptList',
+  entityCreate: 'entityCreate',
+  conceptCreate: 'conceptCreate',
+  fieldList: 'fieldList',
+  fieldCreate: 'fieldCreate'
 };
 
 function renderEntityList(type: string) {
@@ -37,29 +42,36 @@ FlowRouter.route('/concepts', {
 
 
 FlowRouter.route('/edit/:entityId', {
-  name: 'edit',
+  name: ROUTE_NAMES.termEdit,
   action(params: any) {
     ReactLayout.render(MainLayout, {content: <EditEntity entityId={params.entityId}/>});
   }
 });
 
 FlowRouter.route('/create/term', {
-  name: 'entityCreate',
+  name: ROUTE_NAMES.entityCreate,
   action() {
     ReactLayout.render(MainLayout, {content: <EntityCreate />});
   }
 });
 
+FlowRouter.route('/create/concept', {
+  name: ROUTE_NAMES.conceptCreate,
+  action() {
+    ReactLayout.render(MainLayout, {content: <ConceptCreate />});
+  }
+});
+
 
 FlowRouter.route('/fields', {
-  name: 'fieldList',
+  name: ROUTE_NAMES.fieldList,
   action() {
     ReactLayout.render(MainLayout, {content: <FieldList />});
   }
 });
 
 FlowRouter.route('/create/field', {
-  name: 'fieldCreate',
+  name: ROUTE_NAMES.fieldCreate,
   action() {
     ReactLayout.render(MainLayout, {content: <FieldCreate />});
   }

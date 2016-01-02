@@ -51,3 +51,19 @@ input, select, .Select {
   /* Make room for filter select */
   min-height: 30em;
 }
+
+::-webkit-input-placeholder {
+  text-transform: capitalize;
+}
+
+:-moz-placeholder { /* Firefox 18- */
+  text-transform: capitalize;
+}
+
+input::-moz-placeholder {  /* Firefox 19+ */
+  text-transform: capitalize;
+}
+
+:-ms-input-placeholder {
+  text-transform: capitalize;
+}

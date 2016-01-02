@@ -22,9 +22,10 @@ class MainLayout extends React.Component<{content: any}, {}> {
               <ul className="nav nav-pills nav-stacked">
                 {navItem(ROUTE_NAMES.termList, 'Terms')}
                 {navItem(ROUTE_NAMES.conceptList, 'Concepts')}
-                {navItem('entityCreate', 'New Term')}
-                {navItem('fieldList', 'Fields')}
-                {navItem('fieldCreate', 'New Field')}
+                {navItem(ROUTE_NAMES.entityCreate, 'New Term')}
+                {navItem(ROUTE_NAMES.conceptCreate, 'New Concept')}
+                {navItem(ROUTE_NAMES.fieldList, 'Fields')}
+                {navItem(ROUTE_NAMES.fieldCreate, 'New Field')}
               </ul>
             </nav>
             <main className="col-md-11">

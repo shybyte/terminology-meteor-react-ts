@@ -66,18 +66,50 @@ namespace  server {
 
 
     DataCategories.remove({});
-    ['description', 'notes'].map(name => ({
-      name,
+
+    DataCategories.insert({
+      name: 'description',
       type: FIELD_TYPES.TEXT,
+      entityTypes: [ENTITY_TYPES.C],
       multi: false
-    })).forEach(dataCategory => {
-      DataCategories.insert(dataCategory);
+    });
+    DataCategories.insert({
+      name: 'notes',
+      type: FIELD_TYPES.TEXT,
+      entityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
+      multi: false
     });
 
-    DataCategories.insert({name: 'domain', multi: true, type: FIELD_TYPES.PICK_LIST, pickListId: domainPickListId});
-    DataCategories.insert({name: 'status', multi: false, type: FIELD_TYPES.PICK_LIST, pickListId: statusPickListId});
-    DataCategories.insert({name: 'eats', multi: true, type: FIELD_TYPES.REFERENCE, backwardName: 'eaten_by'});
-    DataCategories.insert({name: 'similar', multi: true, type: FIELD_TYPES.REFERENCE});
+    DataCategories.insert({
+      name: 'domain',
+      entityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
+      multi: true,
+      type: FIELD_TYPES.PICK_LIST,
+      pickListId: domainPickListId
+    });
+    DataCategories.insert({
+      name: 'status',
+      entityTypes: [ENTITY_TYPES.T],
+      multi: false,
+      type: FIELD_TYPES.PICK_LIST,
+      pickListId: statusPickListId
+    });
+    DataCategories.insert({
+      name: 'eats',
+      entityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
+      multi: true,
+      type: FIELD_TYPES.REFERENCE,
+      backwardName: 'eaten_by'
+    });
+    DataCategories.insert({
+      name: 'similar',
+      entityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
+      multi: true,
+      type: FIELD_TYPES.REFERENCE
+    });
+
+    DataCategories.insert(TERMS_REFERENCE);
+
     const refFields = DataCategories.find({type: FIELD_TYPES.REFERENCE}).fetch();
 
     const domains = getDescendantPickListItems(domainPickList);

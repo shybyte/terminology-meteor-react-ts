@@ -39,7 +39,10 @@ interface DataCategory extends MongoDBObject {
   type: string; // FIELD_TYPES
   multi: boolean;
   name: string;
+  entityTypes: string[];
+  targetEntityTypes?: string[];
   backwardName?: string;  // used for references
+  backwardMulti?: boolean;
   pickListId?: string;
 }
 
@@ -58,6 +61,17 @@ interface PickListItem {
   name: string;
   items: PickListItem[];
 }
+
+
+const TERMS_REFERENCE = Object.freeze({
+  name: 'terms',
+  entityTypes: [ENTITY_TYPES.C],
+  targetEntityTypes: [ENTITY_TYPES.T],
+  multi: true,
+  backwardMulti: false,
+  type: FIELD_TYPES.REFERENCE,
+  backwardName: 'concept'
+});
 
 const COLLECTIONS = {
   entities: 'entities',
@@ -86,3 +100,4 @@ this.PUBLICATIONS = PUBLICATIONS;
 this.FIELD_TYPES = FIELD_TYPES;
 this.ENTITY_TYPES = ENTITY_TYPES;
 this.minifyEntity = minifyEntity;
+this.TERMS_REFERENCE = TERMS_REFERENCE;

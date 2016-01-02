@@ -69,14 +69,14 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
       this.getNameInputEl().value = '';
     } else {
       serverProxy.updateEntity(this.props.entity._id, this.state.modifiedFieldValues);
-      FlowRouter.go(ROUTE_NAMES.termList);
+      FlowRouter.go(this.props.entity.type === ENTITY_TYPES.C ? ROUTE_NAMES.conceptList : ROUTE_NAMES.termList);
     }
   }
 
   validate(): boolean {
     const entity = assign(this.props.entity, this.state.modifiedFieldValues);
     if (isEmpty(entity.name)) {
-      this.setState({errorMessage: 'A term needs a surface...'});
+      this.setState({errorMessage: `A ${this.getTypeName()} needs a surface...`});
       return false;
     }
     this.setState({errorMessage: ''});
@@ -124,6 +124,10 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
         subscription.stop();
       });
     }, 1);
+  }
+
+  getTypeName() {
+    return this.props.entity.type === ENTITY_TYPES.C ? 'concept' : 'term';
   }
 
   render() {
@@ -181,18 +185,21 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
       </div>;
     }
 
-    const title = isNew ? 'Create New Term' : `Edit Term "${this.props.entity.name}"`;
+    const typeName = this.getTypeName();
+    const title = isNew ? `Create new ${typeName}` : `Edit ${typeName} "${this.props.entity.name}"`;
+    const editableFields = this.data.dataCategories.filter(f => _.contains(f.entityTypes, this.props.entity.type));
 
     return (
       <div className="editEntity">
         <h2>{title}</h2>
         <form action="#" onSubmit={this.onSubmit}>
           <div className="form-group">
-            <label htmlFor="name">Term Surface:</label>
-            <input ref="name" className="form-control" id="name" placeholder="Term Surface" onInput={this.onNameInput}
+            <label htmlFor="name">{typeName} Surface:</label>
+            <input ref="name" className="form-control" id="name" placeholder={typeName + ' Surface'}
+                   onInput={this.onNameInput}
                    defaultValue={entity.name}/>
           </div>
-          {this.data.dataCategories.map(renderField)}
+          {editableFields.map(renderField)}
           {s.successMessage ? this.renderSuccessMessage() : ''}
           {s.errorMessage ? this.renderErrorMessage(s.errorMessage) : ''}
           <button className="btn btn-success">{isNew ? 'Create' : 'Save'}</button>
@@ -203,7 +210,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
 
   renderSuccessMessage() {
     return <div className="alert alert-success" role="alert">
-      Created new term, you can create more terms if you want...
+      Created new {this.getTypeName()}, you can create more {this.getTypeName()}s if you want...
     </div>;
   }
 
