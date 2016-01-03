@@ -55,7 +55,7 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
     const pickListId = getRefValue(this, 'pickListId');
     const multi = getCheckBoxRefValue(this, 'multi');
     const entityTypes = [ENTITY_TYPES.C, ENTITY_TYPES.T];
-    return {name, type, pickListId, multi, entityTypes, system: false};
+    return {name, type, pickListId, multi, entityTypes, system: false, inherit: false};
   }
 
   onSubmit(ev: React.SyntheticEvent) {

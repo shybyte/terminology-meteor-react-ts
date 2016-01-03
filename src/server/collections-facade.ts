@@ -13,12 +13,12 @@ function getReferencedIds(entity: Entity, fieldName: string) {
   return referencedEntities.map(e => e._id);
 }
 
-function forEachRefField(entity: Entity, f: (referencedEntityIDs: string [], fieldName: string, backwardName: string) => void, options: {refFields?: DataCategory[]} = {}) {
+function forEachRefField(entity: Entity, f: (referencedEntityIDs: string [], field: DataCategory, fieldName: string, backwardName: string) => void, options: {refFields?: DataCategory[]} = {}) {
   const refFields = options.refFields || DataCategories.find({type: FIELD_TYPES.REFERENCE}).fetch();
   refFields.forEach(field => {
     const referencedEntityIDs = getReferencedIds(entity, field.name);
     const backwardName = field.backwardName || field.name;
-    f(referencedEntityIDs, field.name, backwardName);
+    f(referencedEntityIDs, field, field.name, backwardName);
   });
 }
 
@@ -56,20 +56,31 @@ class EntitiesFacade {
     const pimpedEntityData = pimpEntityForStorage(e) as Entity;
     const entityId = Entities.insert(pimpedEntityData);
     const entity = assign(pimpedEntityData, {_id: entityId});
-    forEachRefField(entity, (referencedEntityIDs, fieldName, backwardName) => {
+    forEachRefField(entity, (referencedEntityIDs, field, fieldName, backwardName) => {
       addEntityRef(referencedEntityIDs, backwardName, entity);
     }, options);
     return entityId;
   }
 
-  static update(_id: string, updateSpec: Entity) {
+  static update(_id: string, entityUpdate: EntityUpdate) {
     const oldEntity = Entities.findOne(_id);
-    const pimpedUpdateSpec = pimpEntityForStorage(updateSpec);
+    const pimpedUpdateSpec = pimpEntityForStorage(entityUpdate);
     Entities.update(_id, {$set: pimpedUpdateSpec});
     const modifiedEntity = Entities.findOne(_id);
-    forEachRefField(modifiedEntity, (newReferencedEntityIDs, fieldName, backwardName) => {
+    const allFields = DataCategories.find({}).fetch();
+    const keysToInherit = _.intersection(allFields.filter(f => f.type != FIELD_TYPES.REFERENCE).map(f => f.name), Object.keys(pimpedUpdateSpec));
+    const inheritUpdateSpec = _.pick(pimpedUpdateSpec, keysToInherit);
+    forEachRefField(modifiedEntity, (newReferencedEntityIDs, field, fieldName, backwardName) => {
       if (oldEntity.name != modifiedEntity.name) {
         updateNameInReferences(modifiedEntity, newReferencedEntityIDs, fieldName, backwardName);
+      }
+      if (field.inherit && !_.isEmpty(inheritUpdateSpec)) {
+        console.log('Inherit to ', newReferencedEntityIDs, inheritUpdateSpec);
+        Entities.update(
+          {_id: {$in: newReferencedEntityIDs}},
+          {$set: inheritUpdateSpec},
+          {multi: true}
+        );
       }
       const oldReferencedEntityIDs = getReferencedIds(oldEntity, fieldName);
       const addedIds = _.without(newReferencedEntityIDs, ...oldReferencedEntityIDs);

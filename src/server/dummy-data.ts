@@ -73,6 +73,7 @@ namespace  server {
       entityTypes: [ENTITY_TYPES.C],
       multi: false,
       system: false,
+      inherit: false,
     });
     DataCategories.insert({
       name: 'notes',
@@ -80,6 +81,7 @@ namespace  server {
       entityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
       multi: false,
       system: false,
+      inherit: false,
     });
 
     DataCategories.insert({
@@ -89,6 +91,7 @@ namespace  server {
       type: FIELD_TYPES.PICK_LIST,
       pickListId: domainPickListId,
       system: false,
+      inherit: false,
     });
     DataCategories.insert({
       name: 'status',
@@ -97,21 +100,26 @@ namespace  server {
       type: FIELD_TYPES.PICK_LIST,
       pickListId: statusPickListId,
       system: false,
+      inherit: false,
     });
     DataCategories.insert({
       name: 'eats',
       entityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
+      targetEntityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
       multi: true,
       type: FIELD_TYPES.REFERENCE,
       backwardName: 'eaten_by',
       system: false,
+      inherit: false,
     });
     DataCategories.insert({
       name: 'similar',
       entityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
+      targetEntityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
       multi: true,
       type: FIELD_TYPES.REFERENCE,
       system: false,
+      inherit: false,
     });
 
     DataCategories.insert(TERMS_REFERENCE);

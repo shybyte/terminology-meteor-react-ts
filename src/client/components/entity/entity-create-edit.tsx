@@ -107,13 +107,19 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
     });
   }
 
-  getReferencesOption(input: string, callback: Function) {
+  getReferencesOption(field: DataCategory, input: string, callback: Function) {
     const limit = 10;
     console.log('getReferencesOption:', input);
     // This timeout prevents a not loading bug on page reload.
     setTimeout(() => {
-      const subscription = Meteor.subscribe(PUBLICATIONS.miniEntities, {nameFilterText: input, limit}, () => {
-        const entities = Entities.find(createNameSelector(input), {sort: {_lowercase_name: 1}, limit}).fetch();
+      const subscription = Meteor.subscribe(PUBLICATIONS.miniEntities, {
+        nameFilterText: input,
+        types: field.targetEntityTypes,
+        limit
+      }, () => {
+        const selector = assign(createNameSelector(input), {type: {$in: field.targetEntityTypes}});
+        console.log('selector ', selector);
+        const entities = Entities.find(selector, {sort: {_lowercase_name: 1}, limit}).fetch();
         console.log('getReferencesOption result:', entities);
         const options: MiniEntitySelectOption [] = entities.map(e => ({
           value: e._id,
@@ -142,7 +148,8 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
 
     function renderFieldInput(field: DataCategory) {
       const fieldName = field.name;
-      const fieldValue = self.state.modifiedFieldValues[fieldName] || entity[fieldName];
+      const modifiedFieldValues = self.state.modifiedFieldValues;
+      const fieldValue = modifiedFieldValues[fieldName] !== undefined ? modifiedFieldValues[fieldName] : entity[fieldName];
       switch (field.type) {
         case FIELD_TYPES.TEXT:
           const onChange = (ev: React.SyntheticEvent) => self.onChangeTextField(field, ev);
@@ -171,7 +178,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
             multi={true}
             name={fieldName}
             value={selectedOptions}
-            loadOptions={self.getReferencesOption}
+            loadOptions={self.getReferencesOption.bind(self, field)}
             onChange={(options: any) => self.onChangeReferences(field, options)}
           />;
       }

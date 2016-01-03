@@ -39,6 +39,7 @@ interface DataCategory extends MongoDBObject {
   type: string; // FIELD_TYPES
   system: boolean;
   multi: boolean;
+  inherit: boolean;
   name: string;
   entityTypes: string[];
   targetEntityTypes?: string[];
@@ -73,6 +74,7 @@ const TERMS_REFERENCE = Object.freeze({
   type: FIELD_TYPES.REFERENCE,
   backwardName: 'concept',
   system: true,
+  inherit: true,
 });
 
 const COLLECTIONS = {
