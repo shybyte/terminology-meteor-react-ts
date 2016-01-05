@@ -51,6 +51,20 @@ function addEntityRef(entityIDs: string[], fieldName: string, newEntityReference
   );
 }
 
+function propagateInheritedFields(modifiedEntity: Entity, field: DataCategory, referencedEntityIDs: string[]) {
+  if (field.inherit && !_.isEmpty(referencedEntityIDs)) {
+    const allFields = DataCategories.find({}).fetch();
+    const keysToInherit = allFields.filter(f => f.type != FIELD_TYPES.REFERENCE);
+    const inheritUpdateSpec = _.pick(modifiedEntity, _.intersection(keysToInherit.map(f => f.name)));
+    referencedEntityIDs.forEach(addedId => {
+      Entities.update(
+        {_id: addedId},
+        {$set: inheritUpdateSpec}
+      );
+    });
+  }
+}
+
 class EntitiesFacade {
   static insert(e: EntityInsert, options: {refFields?: DataCategory[]} = {}) {
     const pimpedEntityData = pimpEntityForStorage(e) as Entity;
@@ -58,6 +72,7 @@ class EntitiesFacade {
     const entity = assign(pimpedEntityData, {_id: entityId});
     forEachRefField(entity, (referencedEntityIDs, field, fieldName, backwardName) => {
       addEntityRef(referencedEntityIDs, backwardName, entity);
+      propagateInheritedFields(entity, field, referencedEntityIDs);
     }, options);
     return entityId;
   }
@@ -67,28 +82,20 @@ class EntitiesFacade {
     const pimpedUpdateSpec = pimpEntityForStorage(entityUpdate);
     Entities.update(_id, {$set: pimpedUpdateSpec});
     const modifiedEntity = Entities.findOne(_id);
-    const allFields = DataCategories.find({}).fetch();
-    const keysToInherit = _.intersection(allFields.filter(f => f.type != FIELD_TYPES.REFERENCE).map(f => f.name), Object.keys(pimpedUpdateSpec));
-    const inheritUpdateSpec = _.pick(pimpedUpdateSpec, keysToInherit);
     forEachRefField(modifiedEntity, (newReferencedEntityIDs, field, fieldName, backwardName) => {
       if (oldEntity.name != modifiedEntity.name) {
         updateNameInReferences(modifiedEntity, newReferencedEntityIDs, fieldName, backwardName);
-      }
-      if (field.inherit && !_.isEmpty(inheritUpdateSpec)) {
-        console.log('Inherit to ', newReferencedEntityIDs, inheritUpdateSpec);
-        Entities.update(
-          {_id: {$in: newReferencedEntityIDs}},
-          {$set: inheritUpdateSpec},
-          {multi: true}
-        );
       }
       const oldReferencedEntityIDs = getReferencedIds(oldEntity, fieldName);
       const addedIds = _.without(newReferencedEntityIDs, ...oldReferencedEntityIDs);
       addEntityRef(addedIds, backwardName, modifiedEntity);
       const removedIds = _.without(oldReferencedEntityIDs, ...newReferencedEntityIDs);
       removeEntityRef(removedIds, backwardName, modifiedEntity._id);
+      propagateInheritedFields(modifiedEntity, field, newReferencedEntityIDs);
     });
   }
+
+
 }
 
 this.EntitiesFacade = EntitiesFacade;
