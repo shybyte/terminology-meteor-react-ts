@@ -31,14 +31,28 @@ function escapeRegExp(str: string) {
   return str.replace(/[\-\[\]\/\{}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
 
-function createNameSelector(filterText: string): Mongo.Selector {
+function createNameSelector(filterText: string, mode: QueryMode = QueryMode.NAME_PREFIX): Mongo.Selector {
   if (!filterText) {
     return {};
   }
-  const filterRegexp = new RegExp('^' + escapeRegExp(filterText.toLowerCase()));
-  return {
-    _lowercase_name: filterRegexp
-  };
+  switch (mode) {
+    case QueryMode.NAME_PREFIX:
+      return {
+        _lowercase_name: new RegExp('^' + escapeRegExp(filterText.toLowerCase()))
+      };
+    case QueryMode.NAME_REGEXP:
+      return {
+        name: new RegExp(filterText)
+      };
+    case QueryMode.FULL_TEXT:
+      return {
+        $text: {
+          $search: filterText
+        }
+      };
+    default:
+      throw new Error('Unknown queryMode: ' + mode);
+  }
 }
 
 function getDescendantPickListItems(pickList: PickListItem): PickListItem[] {
@@ -103,7 +117,7 @@ function getRefInputElement(reactComponent: React.Component<any, any>, ref: stri
 }
 
 
-function getRefValue(reactComponent: React.Component<any, any>, ref: string)  {
+function getRefValue(reactComponent: React.Component<any, any>, ref: string) {
   const refElement = getRefInputElement(reactComponent, ref);
   if (!refElement) {
     return undefined;
@@ -111,7 +125,7 @@ function getRefValue(reactComponent: React.Component<any, any>, ref: string)  {
   return refElement.value;
 }
 
-function getCheckBoxRefValue(reactComponent: React.Component<any, any>, ref: string)  {
+function getCheckBoxRefValue(reactComponent: React.Component<any, any>, ref: string) {
   const refElement = getRefInputElement(reactComponent, ref);
   if (!refElement) {
     return undefined;

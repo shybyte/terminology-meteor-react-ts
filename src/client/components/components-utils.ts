@@ -1,6 +1,4 @@
-interface PickListSelectOption {
-  value: string;
-  label: string;
+interface PickListSelectOption extends ReactSelectOption {
   level: number;
 }
 

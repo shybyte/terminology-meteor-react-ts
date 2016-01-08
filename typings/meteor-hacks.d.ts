@@ -1,3 +1,4 @@
-declare var ReactMeteorData: any;
-declare var lodash: _.LoDashStatic;
-declare var ReactLayout: any;
+declare const ReactMeteorData: any;
+declare const lodash: _.LoDashStatic;
+declare const ReactLayout: any;
+declare const EasySearch: any;

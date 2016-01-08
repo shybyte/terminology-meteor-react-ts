@@ -78,7 +78,7 @@ namespace  server {
     DataCategories.insert({
       name: 'notes',
       type: FIELD_TYPES.TEXT,
-      entityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
+      entityTypes: [ENTITY_TYPES.T],
       multi: false,
       system: false,
       inherit: false,
@@ -86,7 +86,7 @@ namespace  server {
 
     DataCategories.insert({
       name: 'domain',
-      entityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
+      entityTypes: [ENTITY_TYPES.C],
       multi: true,
       type: FIELD_TYPES.PICK_LIST,
       pickListId: domainPickListId,
@@ -104,8 +104,8 @@ namespace  server {
     });
     DataCategories.insert({
       name: 'eats',
-      entityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
-      targetEntityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
+      entityTypes: [ENTITY_TYPES.C],
+      targetEntityTypes: [ENTITY_TYPES.C],
       multi: true,
       type: FIELD_TYPES.REFERENCE,
       backwardName: 'eaten_by',
@@ -114,8 +114,8 @@ namespace  server {
     });
     DataCategories.insert({
       name: 'similar',
-      entityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
-      targetEntityTypes: [ENTITY_TYPES.C, ENTITY_TYPES.T],
+      entityTypes: [ENTITY_TYPES.C],
+      targetEntityTypes: [ENTITY_TYPES.C],
       multi: true,
       type: FIELD_TYPES.REFERENCE,
       system: false,
@@ -132,25 +132,44 @@ namespace  server {
     Entities.remove({});
     const start = Date.now();
     console.log('Adding dummy entities...');
-    const dummySentences = _.range(40).map(() => chance.sentence());
+
+    const dummyText = Assets.getText('dummy-text.txt');
+    const dummySentences = dummyText.replace(/[\n\t ]+/g, ' ').split('.').map(s => s.trim() + '.').filter(s => s.length < 100);
+    // console.log(dummySentences);
+
     const dummyDomainSets = _.range(40).map(() => pick(domains, chance.d4() - 1).map(f => f.name));
     const entityIds: string[] = [];
     const miniEntityById: {[key: string] : MiniEntity} = {};
-    _.range(100).forEach(() => {
+
+    function createRandomEntity(): EntityInsert {
       const eatsIDs = pick(entityIds, chance.d4() - 1);
       const eatsEntities = eatsIDs.map(id => miniEntityById[id]);
       const similarIDs = pick(entityIds, chance.d4() - 1);
       const similarEntities = similarIDs.map(id => miniEntityById[id]);
-      const newEntityData: EntityInsert = {
-        type: chance.pick([ENTITY_TYPES.C, ENTITY_TYPES.T]),
-        name: chance.word(),
-        description: chance.pick(dummySentences),
-        notes: chance.pick(dummySentences),
-        domain: chance.pick(dummyDomainSets),
-        status: [chance.pick(states).name],
-        eats: eatsEntities,
-        similar: similarEntities
-      };
+      const type = chance.pick([ENTITY_TYPES.C, ENTITY_TYPES.T]);
+      const name = chance.word();
+      const nameUp = name.slice(0, 1).toUpperCase() + name.slice(1);
+      if (type === ENTITY_TYPES.C) {
+        return {
+          type: type,
+          name: chance.pick([name, nameUp]),
+          description: chance.pick(dummySentences),
+          domain: chance.pick(dummyDomainSets),
+          eats: eatsEntities,
+          similar: similarEntities
+        };
+      } else {
+        return {
+          type: type,
+          name: chance.pick([name, nameUp]),
+          notes: chance.pick(dummySentences),
+          status: [chance.pick(states).name],
+        };
+      }
+    }
+
+    _.range(100).forEach(() => {
+      const newEntityData = createRandomEntity();
       const id = EntitiesFacade.insert(newEntityData, {refFields});
       entityIds.push(id);
       miniEntityById[id] = minifyEntity(assign(newEntityData, {_id: id}));

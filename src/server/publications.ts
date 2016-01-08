@@ -4,6 +4,7 @@ Meteor.publish(PUBLICATIONS.entities, (parameters: any = {}) => {
   const mongoFieldSelector = createMongoSelector(parameters.fieldFilters, pickLists);
   const mongoSelector = assign(assign(mongoNameSelector, mongoFieldSelector), {type: parameters.type});
   // console.log(parameters, JSON.stringify(mongoSelector));
+  // const ms = parameters.nameFilterText ? {$text: {$search: parameters.nameFilterText}} : {};
   return Entities.find(mongoSelector, {sort: {_lowercase_name: 1}, limit: parameters.limit || 5});
 });
 
@@ -30,3 +31,4 @@ Meteor.publish(PUBLICATIONS.entity, (parameters: any = {}) => {
 Meteor.publish(PUBLICATIONS.dataCategories, () => DataCategories.find({}));
 
 Meteor.publish(PUBLICATIONS.pickLists, () => PickLists.find({}));
+

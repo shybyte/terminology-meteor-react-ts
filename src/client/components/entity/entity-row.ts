@@ -7,7 +7,7 @@ const li = React.DOM.div;
 
 interface EntityRowProps {
   key: string;
-  entity: Entity;
+  entity: EntitySearchResult;
   activeColumns: string[];
   fields: DataCategory[];
 }
@@ -23,7 +23,7 @@ class EntityRow extends React.Component<EntityRowProps, {}> {
     }
 
     if (colName === 'name') {
-      return a({href: FlowRouter.path('edit', {entityId: entity._id})}, value);
+      return a({href: FlowRouter.path('edit', {entityId: entity.__originalId})}, value);
     }
 
     const field = _.find(fields, f => f.name === colName || f.backwardName === colName);

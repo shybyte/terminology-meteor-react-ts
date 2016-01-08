@@ -29,6 +29,10 @@ interface Entity extends EntityInsert {
   [key: string]: string | string[] | MiniEntity[];
 }
 
+interface EntitySearchResult extends Entity {
+  __originalId: string;
+}
+
 const ENTITY_TYPES = {
   C: 'C', // Concept
   T: 'T'  // Term
