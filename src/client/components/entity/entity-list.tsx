@@ -95,7 +95,7 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
   }
 
   componentWillUnmount() {
-    $(window).off(this.onScroll);
+    $(window).off('scroll', this.onScroll);
   }
 
   addFilter(filter: EntityFilter) {
