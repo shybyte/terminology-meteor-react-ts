@@ -133,7 +133,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
   }
 
   getTypeName() {
-    return this.props.entity.type === ENTITY_TYPES.C ? 'concept' : 'term';
+    return localizeEntityType(this.props.entity.type);
   }
 
   render() {

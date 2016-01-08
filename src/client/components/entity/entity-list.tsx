@@ -8,6 +8,7 @@ interface EntityListProps {
 interface EntityListData {
   dataCategories: DataCategory[];
   entities: EntitySearchResult[];
+  entitiesCountComplete: number;
 }
 
 interface EntityListState {
@@ -45,7 +46,8 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
       });
     return {
       dataCategories: DataCategories.find({}, {sort: {name: 1}}).fetch(),
-      entities: entityIndexCursor.fetch()
+      entities: entityIndexCursor.fetch(),
+      entitiesCountComplete: entityIndexCursor.count()
     };
   }
 
@@ -140,6 +142,9 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
       label: 'Full Text'
     }];
 
+    const {entitiesCountComplete} = this.data;
+    const entitiesCountDisplayed = this.data.entities.length;
+    const {type} = this.props;
     return (
       <div className="entityList">
         <div className="flexRow">
@@ -157,6 +162,10 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
 
           <FilterBar filters={s.filters} addFilter={this.addFilter} changeFilter={this.changeFilter}
                      removeFilter={this.removeFilter}/>
+        </div>
+        <div className="resultCounts">
+          Found <strong>{entitiesCountComplete}</strong> {localizeEntityType(type, entitiesCountComplete)}.&nbsp;
+          <strong>{entitiesCountDisplayed}</strong> {localizeEntityType(type, entitiesCountDisplayed)} displayed.
         </div>
         <table className="table">
           <colgroup>

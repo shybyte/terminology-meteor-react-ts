@@ -139,6 +139,11 @@ function swap<T>(x: T, f: (x: T) => void) {
   return Object.freeze(xClone);
 }
 
+function localizeEntityType(type: string, number = 1) {
+  const singularTypeName = type === ENTITY_TYPES.C ? 'concept' : 'term';
+  return singularTypeName + (number === 1 ? '' : 's');
+}
+
 this.MeteorDataComponent = MeteorDataComponent;
 this.mixinReactMeteorData = mixinReactMeteorData;
 this.createNameSelector = createNameSelector;
@@ -150,3 +155,4 @@ this.swap = swap;
 this.createMongoSelector = createMongoSelector;
 this.getDescendantPickListItems = getDescendantPickListItems;
 this.getCheckBoxRefValue = getCheckBoxRefValue;
+this.localizeEntityType = localizeEntityType;

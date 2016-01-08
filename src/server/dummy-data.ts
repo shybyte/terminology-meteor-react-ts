@@ -141,12 +141,11 @@ namespace  server {
     const entityIds: string[] = [];
     const miniEntityById: {[key: string] : MiniEntity} = {};
 
-    function createRandomEntity(): EntityInsert {
+    function createRandomEntity(type: string): EntityInsert {
       const eatsIDs = pick(entityIds, chance.d4() - 1);
       const eatsEntities = eatsIDs.map(id => miniEntityById[id]);
       const similarIDs = pick(entityIds, chance.d4() - 1);
       const similarEntities = similarIDs.map(id => miniEntityById[id]);
-      const type = chance.pick([ENTITY_TYPES.C, ENTITY_TYPES.T]);
       const name = chance.word();
       const nameUp = name.slice(0, 1).toUpperCase() + name.slice(1);
       if (type === ENTITY_TYPES.C) {
@@ -168,12 +167,20 @@ namespace  server {
       }
     }
 
-    _.range(100).forEach(() => {
-      const newEntityData = createRandomEntity();
+    _.range(20).forEach(() => {
+      const newEntityData = createRandomEntity(ENTITY_TYPES.C);
       const id = EntitiesFacade.insert(newEntityData, {refFields});
       entityIds.push(id);
       miniEntityById[id] = minifyEntity(assign(newEntityData, {_id: id}));
     });
+
+    _.range(200).forEach(() => {
+      const newEntityData = createRandomEntity(ENTITY_TYPES.T);
+      const id = EntitiesFacade.insert(newEntityData, {refFields});
+      entityIds.push(id);
+      miniEntityById[id] = minifyEntity(assign(newEntityData, {_id: id}));
+    });
+
     console.log('Time for adding dummy entities11: ', Date.now() - start);
   });
 }
