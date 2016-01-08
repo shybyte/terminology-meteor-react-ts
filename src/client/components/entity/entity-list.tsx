@@ -1,5 +1,6 @@
 /// <reference path="../../../../typings/react/react-global.d.ts" />
 /// <reference path="../../../../typings/meteor-hacks.d.ts" />
+/// <reference path="../../../../typings/meteor-typescript-libs/jquery.d.ts" />
 
 interface EntityListProps {
   type: string; // ENTITY_TYPES
@@ -19,13 +20,16 @@ interface EntityListState {
 }
 
 const FILTER_KEY = 'filter';
+const DEFAULT_LIMIT = 10;
+const DEFAULT_LIMIT_INCREASE = 10;
 
 class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityListState, EntityListData> implements GetMeteorDataInterface<EntityListData> {
+
   getInitialState(): EntityListState {
     return {
       filterText: '',
       queryMode: QueryMode.NAME_PREFIX,
-      limit: 10,
+      limit: DEFAULT_LIMIT,
       filters: []
     };
   }
@@ -44,10 +48,19 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
         limit: s.limit,
         props
       });
+
+    const entitiesCountComplete = entityIndexCursor.count();
+    const newFetchedEntities = entityIndexCursor.fetch();
+    const isLoadedUntilLimit = entityIndexCursor.isReady() &&
+      (entitiesCountComplete === newFetchedEntities.length || newFetchedEntities.length === s.limit);
+
+    // Display old data if new has not completely arrived, in order to avoid flickering/scroll jumping
+    const entities = isLoadedUntilLimit ? newFetchedEntities : (this.data.entities || []);
+
     return {
       dataCategories: DataCategories.find({}, {sort: {name: 1}}).fetch(),
-      entities: entityIndexCursor.fetch(),
-      entitiesCountComplete: entityIndexCursor.count()
+      entities,
+      entitiesCountComplete,
     };
   }
 
@@ -66,28 +79,41 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
 
   onNameFilterChanged() {
     const filterText = this.getFilterInputEl().value;
-    this.setState({filterText});
+    this.setState({filterText, limit: DEFAULT_LIMIT});
   }
 
   onChangeQueryMode(option: ReactSelectOption) {
     this.setState({
-      queryMode: parseInt(option.value)
+      queryMode: parseInt(option.value),
+      limit: DEFAULT_LIMIT
     });
   }
 
   componentDidMount() {
     this.getFilterInputEl().focus();
+    $(window).scroll(this.onScroll);
+  }
+
+  componentWillUnmount() {
+    $(window).off(this.onScroll);
   }
 
   addFilter(filter: EntityFilter) {
     this.setState({
-      filters: this.state.filters.concat(filter)
+      filters: this.state.filters.concat(filter),
+      limit: DEFAULT_LIMIT
     });
   }
+
 
   componentWillUpdate(newProps: EntityListProps, newState: EntityListState) {
     if (this.state.filters !== newState.filters) {
       this.saveFilter(newState.filters);
+    }
+    if (newProps.type !== this.props.type) {
+      this.setState({
+        limit: DEFAULT_LIMIT
+      });
     }
   }
 
@@ -109,7 +135,8 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
     this.setState({
       filters: this.state.filters.map(filter => {
         return (filter.id === changedFilter.id) ? changedFilter : filter;
-      })
+      }),
+      limit: DEFAULT_LIMIT
     });
   }
 
@@ -119,8 +146,31 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
 
   removeFilter(filterToRemove: EntityFilter) {
     this.setState({
-      filters: this.state.filters.filter(filter => filter.id !== filterToRemove.id)
+      filters: this.state.filters.filter(filter => filter.id !== filterToRemove.id),
+      limit: DEFAULT_LIMIT
     });
+  }
+
+  onScroll() {
+    const target = $(this.refs['showMoreResults']);
+    if (!target.length) {
+      return;
+    }
+
+    const threshold = $(window).scrollTop() + $(window).height() * 1.5 - target.height();
+
+    if (target.offset().top < threshold) {
+      if (!target.data("visible")) {
+        target.data("visible", true);
+        this.setState({
+          limit: this.state.limit + DEFAULT_LIMIT_INCREASE
+        });
+      }
+    } else {
+      if (target.data("visible")) {
+        target.data("visible", false);
+      }
+    }
   }
 
   render() {
@@ -144,7 +194,9 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
 
     const {entitiesCountComplete} = this.data;
     const entitiesCountDisplayed = this.data.entities.length;
+    const hasMoreResults = entitiesCountComplete > entitiesCountDisplayed;
     const {type} = this.props;
+
     return (
       <div className="entityList">
         <div className="flexRow">
@@ -164,8 +216,12 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
                      removeFilter={this.removeFilter}/>
         </div>
         <div className="resultCounts">
-          Found <strong>{entitiesCountComplete}</strong> {localizeEntityType(type, entitiesCountComplete)}.&nbsp;
-          <strong>{entitiesCountDisplayed}</strong> {localizeEntityType(type, entitiesCountDisplayed)} displayed.
+          Found &nbsp;
+          <strong>{entitiesCountComplete}</strong>
+          &nbsp;
+                   {localizeEntityType(type, entitiesCountComplete)}.&nbsp;
+          <strong>{entitiesCountDisplayed}</strong>&nbsp;
+          {localizeEntityType(type, entitiesCountDisplayed)} displayed.
         </div>
         <table className="table">
           <colgroup>
@@ -180,6 +236,9 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
             {this.renderEntities()}
           </tbody>
         </table>
+
+        {hasMoreResults ? this.renderShowMoreResults() : ''}
+
       </div>
     );
   }
@@ -189,6 +248,14 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
       <th key={col}>
         {col}
       </th>
+    );
+  }
+
+  renderShowMoreResults() {
+    return (
+      <div className="showMoreResults" ref="showMoreResults">
+        <span className="loading">Loading...</span>
+      </div>
     );
   }
 
