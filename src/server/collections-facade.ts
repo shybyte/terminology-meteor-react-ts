@@ -22,17 +22,18 @@ function forEachRefField(entity: Entity, f: (referencedEntityIDs: string [], fie
   });
 }
 
-function updateNameInReferences(modifiedEntity: Entity, referencesIds: string [], fieldName: string, backwardName: string) {
-  updateEntityRef(referencesIds, backwardName, modifiedEntity);
-  if (fieldName !== backwardName) {
-    const referencesToMe = getReferencedIds(modifiedEntity, backwardName);
-    updateEntityRef(referencesToMe, fieldName, modifiedEntity);
-  }
-}
-
-function updateEntityRef(entityIDs: string[], fieldName: string, updatedEntity: Entity) {
-  removeEntityRef(entityIDs, fieldName, updatedEntity._id);
-  addEntityRef(entityIDs, fieldName, updatedEntity);
+function updateNameInReferences(modifiedEntity: Entity, fieldName: string) {
+  Entities.update(
+    {
+      [fieldName + '._id']: modifiedEntity._id
+    },
+    {
+      "$set": {
+        [fieldName + '.$'] : minifyEntity(modifiedEntity)
+      }
+    },
+    {multi: true}
+  );
 }
 
 function removeEntityRef(entityIDs: string[], fieldName: string, entityID: string) {
@@ -44,9 +45,10 @@ function removeEntityRef(entityIDs: string[], fieldName: string, entityID: strin
 }
 
 function addEntityRef(entityIDs: string[], fieldName: string, newEntityReference: Entity) {
+  const modifier = {$addToSet: {[fieldName]: minifyEntity(newEntityReference)}};
   Entities.update(
     {_id: {$in: entityIDs}},
-    {$addToSet: {[fieldName]: minifyEntity(newEntityReference)}},
+    modifier,
     {multi: true}
   );
 }
@@ -84,7 +86,10 @@ class EntitiesFacade {
     const modifiedEntity = Entities.findOne(_id);
     forEachRefField(modifiedEntity, (newReferencedEntityIDs, field, fieldName, backwardName) => {
       if (oldEntity.name != modifiedEntity.name) {
-        updateNameInReferences(modifiedEntity, newReferencedEntityIDs, fieldName, backwardName);
+        updateNameInReferences(modifiedEntity, fieldName);
+        if (fieldName != backwardName) {
+          updateNameInReferences(modifiedEntity, backwardName);
+        }
       }
       const oldReferencedEntityIDs = getReferencedIds(oldEntity, fieldName);
       const addedIds = _.without(newReferencedEntityIDs, ...oldReferencedEntityIDs);
