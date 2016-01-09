@@ -28,8 +28,26 @@ function updateNameInReferences(modifiedEntity: Entity, fieldName: string) {
       [fieldName + '._id']: modifiedEntity._id
     },
     {
-      "$set": {
-        [fieldName + '.$'] : minifyEntity(modifiedEntity)
+      $set: {
+        [fieldName + '.$']: minifyEntity(modifiedEntity)
+      }
+    },
+    {multi: true}
+  );
+}
+
+function removeReferencesInOtherEntitiesIfNeeded(modifiedEntity: Entity, field: DataCategory, referencedIds: string[]) {
+  if (field.backwardMulti || _.isEmpty(referencedIds)) {
+    return;
+  }
+  Entities.update(
+    {
+      _id: {$ne: modifiedEntity._id},
+      [field.name + '._id']: {$in: referencedIds}
+    },
+    {
+      $pull: {
+        [field.name]: {_id: {$in: referencedIds}}
       }
     },
     {multi: true}
@@ -44,8 +62,10 @@ function removeEntityRef(entityIDs: string[], fieldName: string, entityID: strin
   );
 }
 
-function addEntityRef(entityIDs: string[], fieldName: string, newEntityReference: Entity) {
-  const modifier = {$addToSet: {[fieldName]: minifyEntity(newEntityReference)}};
+function addOrReplaceBackwardEntityRef(entityIDs: string[], field: DataCategory, newEntityReference: Entity) {
+  const backwardName = field.backwardName || field.name;
+  const miniEntity = minifyEntity(newEntityReference);
+  const modifier = field.backwardMulti ? {$addToSet: {[backwardName]: miniEntity}} : {$set: {[backwardName]: [miniEntity]}};
   Entities.update(
     {_id: {$in: entityIDs}},
     modifier,
@@ -72,8 +92,9 @@ class EntitiesFacade {
     const pimpedEntityData = pimpEntityForStorage(e) as Entity;
     const entityId = Entities.insert(pimpedEntityData);
     const entity = assign(pimpedEntityData, {_id: entityId});
-    forEachRefField(entity, (referencedEntityIDs, field, fieldName, backwardName) => {
-      addEntityRef(referencedEntityIDs, backwardName, entity);
+    forEachRefField(entity, (referencedEntityIDs, field) => {
+      addOrReplaceBackwardEntityRef(referencedEntityIDs, field, entity);
+      removeReferencesInOtherEntitiesIfNeeded(entity, field, referencedEntityIDs);
       propagateInheritedFields(entity, field, referencedEntityIDs);
     }, options);
     return entityId;
@@ -93,7 +114,8 @@ class EntitiesFacade {
       }
       const oldReferencedEntityIDs = getReferencedIds(oldEntity, fieldName);
       const addedIds = _.without(newReferencedEntityIDs, ...oldReferencedEntityIDs);
-      addEntityRef(addedIds, backwardName, modifiedEntity);
+      addOrReplaceBackwardEntityRef(addedIds, field, modifiedEntity);
+      removeReferencesInOtherEntitiesIfNeeded(modifiedEntity, field, newReferencedEntityIDs);
       const removedIds = _.without(oldReferencedEntityIDs, ...newReferencedEntityIDs);
       removeEntityRef(removedIds, backwardName, modifiedEntity._id);
       propagateInheritedFields(modifiedEntity, field, newReferencedEntityIDs);
