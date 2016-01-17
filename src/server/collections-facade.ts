@@ -83,7 +83,7 @@ function addOrReplaceBackwardEntityRef(entityIDs: string[], field: DataCategory,
 
 }
 
-function propagateInheritedFields(modifiedEntity: Entity, field: DataCategory, referencedEntityIDs: string[]) {
+function propagateInheritedFields(modifiedEntity: Entity, field: DataCategory, referencedEntityIDs: string[], removedReferencedEntityIDs: string[] = []) {
   if (!field.inherit) {
     return;
   }
@@ -91,19 +91,28 @@ function propagateInheritedFields(modifiedEntity: Entity, field: DataCategory, r
   const allFields = DataCategories.find({}).fetch();
 
   // Inherit only fields that does not cause inheritance
-  const fieldToInherit = allFields.filter(f => !f.inherit);
+  const fieldToInherit = allFields.filter(f => !f.inherit && _.contains(f.entityTypes, ENTITY_TYPES.C));
   const keysToInherit = fieldToInherit.map(f => f.name).concat(fieldToInherit.map(f => f.backwardName)).filter(_.isString);
 
   if (!_.isEmpty(referencedEntityIDs)) {
     // inherit to "children"
     const inheritUpdateSpec = _.pick(modifiedEntity, keysToInherit);
-    referencedEntityIDs.forEach(addedId => {
-      Entities.update(
-        {_id: addedId},
-        {$set: inheritUpdateSpec}
-      );
-    });
+    Entities.update(
+      {_id: {$in: referencedEntityIDs}},
+      {$set: inheritUpdateSpec},
+      {multi: true}
+    );
   }
+
+  if (_.contains(field.entityTypes, modifiedEntity.type) && !_.isEmpty(removedReferencedEntityIDs)) {
+    // Remove inherited fields in children
+    Entities.update(
+      {_id: {$in: removedReferencedEntityIDs}},
+      {$unset: _.zipObject(keysToInherit.map(k => [k, '']))},
+      {multi: true}
+    );
+  }
+
 
   const backwardRefs = modifiedEntity[field.backwardName] as MiniEntity[];
   if (!_.isEmpty(backwardRefs)) {
@@ -150,7 +159,7 @@ class EntitiesFacade {
       removeReferencesInOtherEntitiesIfNeeded(modifiedEntity, field, newReferencedEntityIDs);
       const removedIds = _.without(oldReferencedEntityIDs, ...newReferencedEntityIDs);
       removeEntityRef(removedIds, backwardName, modifiedEntity._id);
-      propagateInheritedFields(modifiedEntity, field, newReferencedEntityIDs);
+      propagateInheritedFields(modifiedEntity, field, newReferencedEntityIDs, removedIds);
     });
   }
 
