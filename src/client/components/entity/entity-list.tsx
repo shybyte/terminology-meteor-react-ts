@@ -66,7 +66,7 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
 
   getActiveColumns() {
     const type = this.props.type;
-    const forwardFieldNames = this.data.dataCategories.filter(dc => type === ENTITY_TYPES.T || _.contains(dc.entityTypes, type)).map(dc => dc.name);
+    const forwardFieldNames = this.data.dataCategories.filter(dc => (type === ENTITY_TYPES.T && !dc.inherit) || _.contains(dc.entityTypes, type)).map(dc => dc.name);
     const backWardFieldNames = this.data.dataCategories.filter(dc => type === ENTITY_TYPES.T || _.contains(dc.targetEntityTypes, type)).map(dc => dc.backwardName);
     const fieldColumns = forwardFieldNames.concat(backWardFieldNames).filter(_.isString);
     return ['name'].concat(_.sortBy(fieldColumns));
