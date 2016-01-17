@@ -71,19 +71,51 @@ function addOrReplaceBackwardEntityRef(entityIDs: string[], field: DataCategory,
     modifier,
     {multi: true}
   );
+
+  if (field.backwardName && newEntityReference[field.backwardName]) {
+    const refs = newEntityReference[field.backwardName] as MiniEntity[];
+    Entities.update(
+      {_id: {$in: refs.map(ref => ref._id)}},
+      {$addToSet: {[field.name]: miniEntity}},
+      {multi: true}
+    );
+  }
+
 }
 
 function propagateInheritedFields(modifiedEntity: Entity, field: DataCategory, referencedEntityIDs: string[]) {
-  if (field.inherit && !_.isEmpty(referencedEntityIDs)) {
-    const allFields = DataCategories.find({}).fetch();
-    const keysToInherit = allFields.filter(f => f.type != FIELD_TYPES.REFERENCE);
-    const inheritUpdateSpec = _.pick(modifiedEntity, _.intersection(keysToInherit.map(f => f.name)));
+  if (!field.inherit) {
+    return;
+  }
+
+  const allFields = DataCategories.find({}).fetch();
+
+  // Inherit only fields that does not cause inheritance
+  const fieldToInherit = allFields.filter(f => !f.inherit);
+  const keysToInherit = fieldToInherit.map(f => f.name).concat(fieldToInherit.map(f => f.backwardName)).filter(_.isString);
+
+  if (!_.isEmpty(referencedEntityIDs)) {
+    // inherit to "children"
+    const inheritUpdateSpec = _.pick(modifiedEntity, keysToInherit);
     referencedEntityIDs.forEach(addedId => {
       Entities.update(
         {_id: addedId},
         {$set: inheritUpdateSpec}
       );
     });
+  }
+
+  const backwardRefs = modifiedEntity[field.backwardName] as MiniEntity[];
+  if (!_.isEmpty(backwardRefs)) {
+    // inherit from "parent"
+    const parent = Entities.findOne(backwardRefs[0]._id);
+    if (parent) {
+      const inheritUpdateSpec = _.pick(parent, keysToInherit);
+      Entities.update(
+        {_id: modifiedEntity._id},
+        {$set: inheritUpdateSpec}
+      );
+    }
   }
 }
 

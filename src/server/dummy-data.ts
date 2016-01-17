@@ -141,6 +141,7 @@ namespace  server {
 
     const dummyDomainSets = _.range(40).map(() => pick(domains, chance.d4() - 1).map(f => f.name));
     const entityIds: string[] = [];
+    const miniConcepts: MiniEntity[] = [];
     const miniEntityById: {[key: string] : MiniEntity} = {};
 
     function createRandomEntity(type: string): EntityInsert {
@@ -162,6 +163,8 @@ namespace  server {
       } else {
         return {
           type: type,
+          [TERMS_REFERENCE.backwardName]: chance.bool() ? [] : [chance.pick(miniConcepts)],
+          // [TERMS_REFERENCE.backwardName]: [chance.pick(miniConcepts)],
           name: chance.pick([name, nameUp]),
           notes: chance.pick(dummySentences),
           status: [chance.pick(states).name],
@@ -173,10 +176,12 @@ namespace  server {
       const newEntityData = createRandomEntity(ENTITY_TYPES.C);
       const id = EntitiesFacade.insert(newEntityData, {refFields});
       entityIds.push(id);
-      miniEntityById[id] = minifyEntity(assign(newEntityData, {_id: id}));
+      const miniEntity = minifyEntity(assign(newEntityData, {_id: id}));
+      miniEntityById[id] = miniEntity;
+      miniConcepts.push(miniEntity);
     });
 
-    _.range(200).forEach(() => {
+    _.range(100).forEach(() => {
       const newEntityData = createRandomEntity(ENTITY_TYPES.T);
       const id = EntitiesFacade.insert(newEntityData, {refFields});
       entityIds.push(id);
