@@ -17,9 +17,11 @@ interface EntityListState {
   queryMode?: QueryMode;
   limit?: number;
   filters?: EntityFilter[];
+  activeColumns?: string[];
 }
 
 const FILTER_KEY = 'filter';
+const ACTIVE_COLUMNS_KEY = 'activeColumns';
 const DEFAULT_LIMIT = 10;
 const DEFAULT_LIMIT_INCREASE = 10;
 
@@ -30,7 +32,8 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
       filterText: '',
       queryMode: QueryMode.NAME_PREFIX,
       limit: DEFAULT_LIMIT,
-      filters: []
+      filters: [],
+      activeColumns: ['name']
     };
   }
 
@@ -64,7 +67,7 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
     };
   }
 
-  getActiveColumns() {
+  getPossibleColumns(): string[] {
     const type = this.props.type;
     const forwardFieldNames = this.data.dataCategories.filter(dc => (type === ENTITY_TYPES.T && !dc.inherit) || _.contains(dc.entityTypes, type)).map(dc => dc.name);
     const backWardFieldNames = this.data.dataCategories.filter(dc => type === ENTITY_TYPES.T || _.contains(dc.targetEntityTypes, type)).map(dc => dc.backwardName);
@@ -72,6 +75,11 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
     return ['name'].concat(_.sortBy(fieldColumns));
   }
 
+
+  getActiveColumns() {
+    // Sort name always first
+    return _.sortBy(this.state.activeColumns, columnName => columnName === 'name' ? '' : columnName);
+  }
 
   getFilterInputEl() {
     return this.refs['filter'] as HTMLInputElement;
@@ -92,7 +100,23 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
   componentDidMount() {
     this.getFilterInputEl().focus();
     $(window).scroll(this.onScroll);
+
+    // We want to prevent closing of the dopdown and at the same time we need to get the values.
+    const self = this;
+    $("ul.dropdown-menu").on("click", "label", function (e) {
+      self.onClickColumnSelectorItem(this, e);
+    });
   }
+
+  onClickColumnSelectorItem(label: HTMLInputElement, e: Event) {
+    e.stopPropagation();
+    const checkbox = $('input', label).get(0) as HTMLInputElement;
+    const columnName = checkbox.value;
+    this.setState({
+      activeColumns: _.uniq(checkbox.checked ? this.getActiveColumns().concat(columnName) : _.without(this.getActiveColumns(), columnName))
+    });
+  }
+
 
   componentWillUnmount() {
     $(window).off('scroll', this.onScroll);
@@ -105,14 +129,22 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
     });
   }
 
+  loadActiveColumns(entityType: string) {
+    return JSON.parse(localStorage.getItem(ACTIVE_COLUMNS_KEY + entityType) || '["name"]');
+  }
+
 
   componentWillUpdate(newProps: EntityListProps, newState: EntityListState) {
     if (this.state.filters !== newState.filters) {
       this.saveFilter(newState.filters);
     }
+    if (!_.isEqual(this.state.activeColumns, newState.activeColumns)) {
+      localStorage.setItem(ACTIVE_COLUMNS_KEY + this.props.type, JSON.stringify(newState.activeColumns));
+    }
     if (newProps.type !== this.props.type) {
       this.setState({
-        limit: DEFAULT_LIMIT
+        limit: DEFAULT_LIMIT,
+        activeColumns: this.loadActiveColumns(newProps.type)
       });
     }
   }
@@ -128,7 +160,10 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
         lf.field = field;
       });
     }));
-    this.setState({filters: fixedFilters});
+    this.setState({
+      filters: fixedFilters,
+      activeColumns: this.loadActiveColumns(this.props.type)
+    });
   }
 
   changeFilter(changedFilter: EntityFilter) {
@@ -173,6 +208,7 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
     }
   }
 
+
   render() {
     const s = this.state;
     const onNameFilterChanged = () => this.onNameFilterChanged();
@@ -214,6 +250,9 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
 
           <FilterBar filters={s.filters} addFilter={this.addFilter} changeFilter={this.changeFilter}
                      removeFilter={this.removeFilter}/>
+
+          {this.renderColumnSelector()}
+
         </div>
         <div className="resultCounts">
           Found &nbsp;
@@ -241,6 +280,33 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
 
       </div>
     );
+  }
+
+  renderColumnSelector() {
+    return (
+      <div className="btn-group">
+        <button type="button" className="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">
+          <span className="glyphicon glyphicon-list" title="Select Columns"></span>
+          Columns
+        </button>
+        <ul className="dropdown-menu dropdown-menu-right columnSelector">
+          {this.getPossibleColumns().map(this.renderColumnSelectorItem)}
+        </ul>
+      </div>
+    );
+  }
+
+  renderColumnSelectorItem(columnName: string) {
+    return <li key={columnName}>
+      <div className="checkbox">
+        <label>
+          <input type="checkbox" value={columnName} checked={_.contains(this.state.activeColumns, columnName)}
+                 onChange={_.noop}/>
+          {columnName}
+        </label>
+      </div>
+    </li>;
   }
 
   renderTableHeader() {
