@@ -163,6 +163,26 @@ class EntitiesFacade {
     });
   }
 
+  static delete(_id: string) {
+    Entities.remove(_id);
+    const refFields = DataCategories.find({type: FIELD_TYPES.REFERENCE}).fetch();
+    refFields.forEach(field => {
+      Entities.update(
+        {[field.name + '._id']: _id},
+        {$pull: {[field.name]: {_id: _id}}},
+        {multi: true}
+      );
+      if (field.backwardName) {
+        refFields.forEach(field => {
+          Entities.update(
+            {[field.backwardName + '._id']: _id},
+            {$pull: {[field.backwardName]: {_id: _id}}},
+            {multi: true}
+          );
+        });
+      }
+    });
+  }
 
 }
 

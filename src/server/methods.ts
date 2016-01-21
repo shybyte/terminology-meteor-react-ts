@@ -5,6 +5,9 @@ const serverMethods: ServerMethods = {
   updateEntity(_id: string, entity: Entity) {
     EntitiesFacade.update(_id, entity);
   },
+  deleteEntity(_id: string) {
+    EntitiesFacade.delete(_id);
+  },
   createField(field: DataCategory) {
     DataCategories.insert(field);
   },

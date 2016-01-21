@@ -264,10 +264,12 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
         </div>
         <table className="table">
           <colgroup>
+            <col></col>
             {activeColumns.map(ac => <col key={ac} span={1} style={columnStyle}/>)}
           </colgroup>
           <thead>
             <tr>
+              <th></th>
               {this.renderTableHeader()}
             </tr>
           </thead>

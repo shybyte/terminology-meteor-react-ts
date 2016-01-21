@@ -1,4 +1,9 @@
+/**
+ * This seemingly empty methods will be implemented in createServerProxy()
+ */
 class ServerProxy implements ServerMethods {
+
+
   createEntity(e: EntityInsert) {
   }
 
@@ -9,6 +14,9 @@ class ServerProxy implements ServerMethods {
   }
 
   deleteField(field: DataCategory) {
+  }
+
+  deleteEntity(_id: string) {
   }
 }
 
