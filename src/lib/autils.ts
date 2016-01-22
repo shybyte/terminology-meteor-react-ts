@@ -122,7 +122,7 @@ function getRefValue(reactComponent: React.Component<any, any>, ref: string) {
   if (!refElement) {
     return undefined;
   }
-  return refElement.value;
+  return refElement.value.trim();
 }
 
 function getCheckBoxRefValue(reactComponent: React.Component<any, any>, ref: string) {

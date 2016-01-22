@@ -54,9 +54,12 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
     const type = getRefValue(this, 'type');
     const entityType = getRefValue(this, 'entityType');
     const pickListId = getRefValue(this, 'pickListId');
-    const multi = getCheckBoxRefValue(this, 'multi');
+    const multi = type === FIELD_TYPES.PICK_LIST ? getCheckBoxRefValue(this, 'multi') : (type === FIELD_TYPES.REFERENCE);
+    const backwardNameRawValue = getRefValue(this, 'backwardName');
+    const backwardName = (type === FIELD_TYPES.REFERENCE && backwardNameRawValue) ? backwardNameRawValue : undefined;
     const entityTypes = [entityType];
-    return {name, type, pickListId, multi, entityTypes, system: false, inherit: false};
+    const targetEntityTypes = entityTypes;
+    return {name, type, pickListId, multi, entityTypes, targetEntityTypes, backwardName, system: false, inherit: false};
   }
 
   onSubmit(ev: React.SyntheticEvent) {
@@ -107,10 +110,15 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
             <select ref="type" className="form-control" id="type" onChange={this.onChangeType} value={s.type}>
               <option value={FIELD_TYPES.TEXT}>Text</option>
               <option value={FIELD_TYPES.PICK_LIST}>PickList</option>
+              <option value={FIELD_TYPES.REFERENCE}>Reference</option>
             </select>
           </div>
+
           {s.type === FIELD_TYPES.PICK_LIST ?  this.renderMultiCheckBox() : ''}
           {s.type === FIELD_TYPES.PICK_LIST ?  this.renderPickListSelector() : ''}
+
+          {s.type === FIELD_TYPES.REFERENCE ?  this.renderReferenceSection() : ''}
+
           {s.successMessage ? this.renderSuccessMessage() : ''}
           {s.errorMessage ? this.renderErrorMessage(s.errorMessage) : ''}
           <button className="btn btn-success">Create Field</button>
@@ -118,6 +126,14 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
       </div>
     );
   }
+
+  renderReferenceSection() {
+    return <div className="form-group">
+      <label htmlFor="backwardName">Optional Backward Name:</label>
+      <input ref="backwardName" className="form-control" id="backwardName" placeholder="Backward Name"/>
+    </div>;
+  }
+
 
   renderMultiCheckBox() {
     return <div className="checkbox">
