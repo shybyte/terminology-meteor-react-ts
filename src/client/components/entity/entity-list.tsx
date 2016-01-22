@@ -78,7 +78,7 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
 
 
   getActiveColumns() {
-    const meaningFullActiveColumns = (this.state.queryMode === QueryMode.FULL_TEXT) ? this.state.activeColumns : _.without(this.state.activeColumns, 'score');
+    const meaningFullActiveColumns = _.intersection(this.state.activeColumns, this.getPossibleColumns());
     // Sort name always first
     return _.sortBy(meaningFullActiveColumns, columnName => columnName === 'name' ? '' : columnName);
   }
