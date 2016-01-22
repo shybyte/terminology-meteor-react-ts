@@ -52,9 +52,10 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
   getFormAsField(): DataCategory {
     const name = getRefValue(this, 'name');
     const type = getRefValue(this, 'type');
+    const entityType = getRefValue(this, 'entityType');
     const pickListId = getRefValue(this, 'pickListId');
     const multi = getCheckBoxRefValue(this, 'multi');
-    const entityTypes = [ENTITY_TYPES.C, ENTITY_TYPES.T];
+    const entityTypes = [entityType];
     return {name, type, pickListId, multi, entityTypes, system: false, inherit: false};
   }
 
@@ -95,7 +96,14 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
             <input ref="name" className="form-control" id="name" placeholder="Field Name" onInput={this.onNameInput}/>
           </div>
           <div className="form-group">
-            <label htmlFor="type">Type:</label>
+            <label htmlFor="entityType">Entity Type:</label>
+            <select ref="entityType" className="form-control" id="entityType">
+              <option value={ENTITY_TYPES.C}>Concept</option>
+              <option value={ENTITY_TYPES.T}>Term</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label htmlFor="type">Field Type:</label>
             <select ref="type" className="form-control" id="type" onChange={this.onChangeType} value={s.type}>
               <option value={FIELD_TYPES.TEXT}>Text</option>
               <option value={FIELD_TYPES.PICK_LIST}>PickList</option>
