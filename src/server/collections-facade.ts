@@ -108,7 +108,7 @@ function propagateInheritedFields(modifiedEntity: Entity, field: DataCategory, r
     // Remove inherited fields in children
     Entities.update(
       {_id: {$in: removedReferencedEntityIDs}},
-      {$unset: _.zipObject(keysToInherit.map(k => [k, '']))},
+      {$set: _.zipObject(keysToInherit.map(k => [k, null]))}, // $unset did not worked (no reactivity) so we set it to null
       {multi: true}
     );
   }
@@ -127,6 +127,9 @@ function propagateInheritedFields(modifiedEntity: Entity, field: DataCategory, r
     }
   }
 }
+
+
+
 
 class EntitiesFacade {
   static insert(e: EntityInsert, options: {refFields?: DataCategory[]} = {}) {
@@ -163,7 +166,11 @@ class EntitiesFacade {
     });
   }
 
-  static delete(_id: string) {
+  static deleteEntity(_id: string) {
+    const oldEntity = Entities.findOne(_id);
+    if (oldEntity.type === ENTITY_TYPES.C) {
+      propagateInheritedFields(oldEntity, TERMS_REFERENCE, [], (oldEntity[TERMS_REFERENCE.name] as MiniEntity[]).map(me => me._id));
+    }
     Entities.remove(_id);
     const refFields = DataCategories.find({type: FIELD_TYPES.REFERENCE}).fetch();
     refFields.forEach(field => {
@@ -173,13 +180,11 @@ class EntitiesFacade {
         {multi: true}
       );
       if (field.backwardName) {
-        refFields.forEach(field => {
-          Entities.update(
-            {[field.backwardName + '._id']: _id},
-            {$pull: {[field.backwardName]: {_id: _id}}},
-            {multi: true}
-          );
-        });
+        Entities.update(
+          {[field.backwardName + '._id']: _id},
+          {$pull: {[field.backwardName]: {_id: _id}}},
+          {multi: true}
+        );
       }
     });
   }

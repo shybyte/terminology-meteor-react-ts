@@ -6,7 +6,7 @@ const serverMethods: ServerMethods = {
     EntitiesFacade.update(_id, entity);
   },
   deleteEntity(_id: string) {
-    EntitiesFacade.delete(_id);
+    EntitiesFacade.deleteEntity(_id);
   },
   createField(field: DataCategory) {
     DataCategories.insert(field);
