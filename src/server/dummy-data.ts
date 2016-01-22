@@ -188,6 +188,18 @@ namespace  server {
       miniEntityById[id] = minifyEntity(assign(newEntityData, {_id: id}));
     });
 
-    console.log('Time for adding dummy entities11: ', Date.now() - start);
+
+    EntitiesFacade.insert({
+      name: 'time',
+      notes: 'nothing',
+      type: ENTITY_TYPES.T
+    });
+    EntitiesFacade.insert({
+      name: 'nothing',
+      notes: 'time',
+      type: ENTITY_TYPES.T
+    });
+
+    console.log('Time for adding dummy entities: ', Date.now() - start);
   });
 }

@@ -72,13 +72,15 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
     const forwardFieldNames = this.data.dataCategories.filter(dc => (type === ENTITY_TYPES.T && !dc.inherit) || _.contains(dc.entityTypes, type)).map(dc => dc.name);
     const backWardFieldNames = this.data.dataCategories.filter(dc => type === ENTITY_TYPES.T || _.contains(dc.targetEntityTypes, type)).map(dc => dc.backwardName);
     const fieldColumns = forwardFieldNames.concat(backWardFieldNames).filter(_.isString);
-    return ['name'].concat(_.sortBy(fieldColumns));
+    const isFullTextQuery = this.state.queryMode === QueryMode.FULL_TEXT;
+    return ['name'].concat(isFullTextQuery ? ['score'] : []).concat(_.sortBy(fieldColumns));
   }
 
 
   getActiveColumns() {
+    const meaningFullActiveColumns = (this.state.queryMode === QueryMode.FULL_TEXT) ? this.state.activeColumns : _.without(this.state.activeColumns, 'score');
     // Sort name always first
-    return _.sortBy(this.state.activeColumns, columnName => columnName === 'name' ? '' : columnName);
+    return _.sortBy(meaningFullActiveColumns, columnName => columnName === 'name' ? '' : columnName);
   }
 
   getFilterInputEl() {
