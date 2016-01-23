@@ -80,7 +80,7 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
       this.setState({errorMessage: 'A real field needs a real name.'});
       return false;
     }
-    if (_.contains(this.data.existingFieldNames, newField.name)) {
+    if (_.contains(this.data.existingFieldNames, newField.name) || newField.name === 'language') {
       this.setState({errorMessage: 'This field name exist already.'});
       return false;
     }
