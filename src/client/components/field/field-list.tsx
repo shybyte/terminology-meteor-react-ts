@@ -17,7 +17,8 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
     return ['name', 'type', 'multi', 'pickListId'];
   }
 
-  private deleteField(field: DataCategory): any {
+  private deleteField(ev: React.SyntheticEvent, field: DataCategory): any {
+    ev.preventDefault();
     serverProxy.deleteField(field._id);
   }
 
@@ -31,6 +32,7 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
       <div>
         <table className="table">
           <colgroup>
+            <col/>
             {activeColumns.map(ac => <col key={ac} span={1} style={columnStyle}/>)}
           </colgroup>
           <thead>
@@ -47,31 +49,40 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
   }
 
   renderTableHeader() {
-    return this.getActiveColumns().map(col =>
+    return [<th/>].concat(this.getActiveColumns().map(col =>
       <th key={col}>
         {col}
       </th>
-    );
+    ));
   }
 
   renderFields() {
     return this.data.dataCategories.map(field =>
+
       <tr key={field._id}>
-        <td>{field.name}
-          {field.system ? '' : this.renderDeleteButton(field)}
+        <td>
+          {field.system ? '' : (
+          <div className="btn-group">
+            <button type="button" className="btn btn-default iconButton dropdown-toggle" data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false">
+              <span className="glyphicon glyphicon-option-vertical" title="Actions"></span>
+            </button>
+            <ul className="dropdown-menu dropdown-menu">
+              <li>
+                <a href="#" onClick={(ev) => this.deleteField(ev,field)}>Delete</a>
+              </li>
+            </ul>
+          </div>)
+            }
         </td>
+        <td>{field.name}</td>
         <td>{field.type}</td>
         <td>{field.multi ? 'multi' : ''}</td>
         <td>{field.pickListId ? PickLists.findOne(field.pickListId).name  :' '}</td>
       </tr>
     );
   }
-
-  renderDeleteButton(field: DataCategory) {
-    return <span className="glyphicon glyphicon-remove removeButton" title="Delete Field"
-                 onClick={() => this.deleteField(field)}></span>;
-  }
-
 }
 
 
