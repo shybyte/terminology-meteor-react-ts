@@ -7,6 +7,7 @@ interface FieldCreateComponentProps {
 interface FieldCreateData {
   pickLists: PickList[];
   dataCategories: DataCategory[];
+  existingFieldNames: string[];
 }
 
 interface FieldCreateState {
@@ -25,9 +26,11 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
   }
 
   getMeteorData() {
+    const dataCategories = DataCategories.find({}, {sort: {name: 1}}).fetch();
     return {
       pickLists: PickLists.find({}).fetch(),
-      dataCategories: DataCategories.find({}, {sort: {name: 1}}).fetch()
+      existingFieldNames: ['name', 'type', ...dataCategories.map(dc => dc.name), ..._.compact(dataCategories.map(dc => dc.backwardName))],
+      dataCategories
     };
   }
 
@@ -58,8 +61,7 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
     const backwardNameRawValue = getRefValue(this, 'backwardName');
     const backwardName = (type === FIELD_TYPES.REFERENCE && backwardNameRawValue) ? backwardNameRawValue : undefined;
     const entityTypes = [entityType];
-    const targetEntityTypes = entityTypes;
-    return {name, type, pickListId, multi, entityTypes, targetEntityTypes, backwardName, system: false, inherit: false};
+    return {name, type, pickListId, multi, entityTypes, targetEntityTypes: entityTypes, backwardName, system: false, inherit: false};
   }
 
   onSubmit(ev: React.SyntheticEvent) {
@@ -75,7 +77,15 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
   validate(): boolean {
     const newField = this.getFormAsField();
     if (isEmpty(newField.name)) {
-      this.setState({errorMessage: 'A Field needs a surface...'});
+      this.setState({errorMessage: 'A real field needs a real name.'});
+      return false;
+    }
+    if (_.contains(this.data.existingFieldNames, newField.name)) {
+      this.setState({errorMessage: 'This field exist already.'});
+      return false;
+    }
+    if (_.startsWith(newField.name, '_')) {
+      this.setState({errorMessage: 'A field name should not start with _ .'});
       return false;
     }
     this.setState({errorMessage: ''});
