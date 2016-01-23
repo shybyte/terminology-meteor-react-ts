@@ -25,12 +25,8 @@ const serverMethods: ServerMethods = {
   createEntity: EntitiesFacade.insert,
   updateEntity: EntitiesFacade.update,
   deleteEntity: EntitiesFacade.deleteEntity,
-  createField(field: DataCategory) {
-    DataCategories.insert(field);
-  },
-  deleteField(_id: string) {
-    FieldsFacade.deleteField(_id);
-  },
+  createField: FieldsFacade.insert,
+  deleteField: FieldsFacade.deleteField,
 };
 
 const queuedServerMethods = _.mapValues(serverMethods, (method, methodName) => (...args: any[]) => {

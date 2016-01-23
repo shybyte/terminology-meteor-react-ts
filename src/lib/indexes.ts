@@ -34,7 +34,7 @@ const EntitiesIndex = new EasySearch.Index({
     },
 
     fields (searchQuery: string, options: SearchEntitiesOptions) {
-      const isFullText =  options.search.props.queryMode === QueryMode.FULL_TEXT;
+      const isFullText = options.search.props.queryMode === QueryMode.FULL_TEXT;
       return isFullText ? {score: {$meta: "textScore"}} : {};
     },
 
@@ -48,6 +48,26 @@ const EntitiesIndex = new EasySearch.Index({
   })
 });
 
+function ensureFullTextIndex() {
+  try {
+    Entities._dropIndex('fullText');
+  } catch (error) {
+    // Ignore it, the index was just not there.
+  }
+
+  const textFieldNames = DataCategories.find({type: FIELD_TYPES.TEXT}).fetch().map(f => f.name);
+  const indexFieldsSpec = _.zipObject(['name', ...textFieldNames].map(name => [name, 'text']));
+  const weights = _.zipObject([['name', 3], ...textFieldNames.map(name => [name, 1])]);
+  console.log('ensureFullTextIndex: ', indexFieldsSpec, weights);
+  Entities._ensureIndex(indexFieldsSpec,
+    {
+      name: 'fullText',
+      weights
+    }
+  );
+}
+
 
 this.EntitiesIndex = EntitiesIndex;
 this.QueryMode = QueryMode;
+this.ensureFullTextIndex = ensureFullTextIndex;

@@ -13,7 +13,6 @@ namespace  server {
     return Array.isArray(result) ? result : [result];
   }
 
-
   Meteor.startup(function () {
     // if (Entities.find().count() > 0) {
     //    return;
@@ -201,5 +200,8 @@ namespace  server {
     });
 
     console.log('Time for adding dummy entities: ', Date.now() - start);
+
+    ensureFullTextIndex();
+
   });
 }
