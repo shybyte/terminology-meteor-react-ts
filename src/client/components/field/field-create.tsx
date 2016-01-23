@@ -81,7 +81,7 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
       return false;
     }
     if (_.contains(this.data.existingFieldNames, newField.name)) {
-      this.setState({errorMessage: 'This field exist already.'});
+      this.setState({errorMessage: 'This field name exist already.'});
       return false;
     }
     if (_.startsWith(newField.name, '_')) {
