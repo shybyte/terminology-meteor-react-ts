@@ -307,7 +307,7 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
         <label>
           <input type="checkbox" value={columnName} checked={_.contains(this.state.activeColumns, columnName)}
                  onChange={_.noop}/>
-          {columnName}
+          {toDisplayName(columnName)}
         </label>
       </div>
     </li>;
@@ -316,7 +316,7 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
   renderTableHeader() {
     return this.getActiveColumns().map(col =>
       <th key={col}>
-        {col}
+        {toDisplayName(col)}
       </th>
     );
   }

@@ -76,7 +76,7 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
           </div>)
             }
         </td>
-        <td>{field.name}</td>
+        <td>{toDisplayName(field.name)}</td>
         <td>{field.type}</td>
         <td>{field.multi ? 'multi' : ''}</td>
         <td>{field.pickListId ? PickLists.findOne(field.pickListId).name  :' '}</td>

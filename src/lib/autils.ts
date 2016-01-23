@@ -144,6 +144,10 @@ function localizeEntityType(type: string, number = 1) {
   return singularTypeName + (number === 1 ? '' : 's');
 }
 
+function toDisplayName(internalName: string) {
+  return internalName.replace(/^_/, '').replace(/_/g, ' ');
+}
+
 this.MeteorDataComponent = MeteorDataComponent;
 this.mixinReactMeteorData = mixinReactMeteorData;
 this.createNameSelector = createNameSelector;
@@ -156,3 +160,4 @@ this.createMongoSelector = createMongoSelector;
 this.getDescendantPickListItems = getDescendantPickListItems;
 this.getCheckBoxRefValue = getCheckBoxRefValue;
 this.localizeEntityType = localizeEntityType;
+this.toDisplayName = toDisplayName;

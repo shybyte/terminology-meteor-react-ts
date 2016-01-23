@@ -19,6 +19,7 @@ namespace  server {
     // }
 
     PickLists.remove({});
+
     const domainPickListId = PickLists.insert({
       name: 'Domain',
       items: [
@@ -47,6 +48,29 @@ namespace  server {
       ]
     });
     const domainPickList = PickLists.findOne(domainPickListId);
+
+    const languagePickListId = PickLists.insert({
+      name: 'Language',
+      items: [
+        {
+          name: 'en',
+          items: [
+            {name: 'en-us', items: []},
+            {name: 'en-gb', items: []},
+
+          ]
+        },
+        {
+          name: 'de',
+          items: []
+        },
+        {
+          name: 'es',
+          items: []
+        }
+      ]
+    });
+    const languagePickList = PickLists.findOne(languagePickListId);
 
     const statusPickListId = PickLists.insert({
       name: 'Status',
@@ -102,6 +126,15 @@ namespace  server {
       inherit: false,
     });
     DataCategories.insert({
+      name: '_language',
+      entityTypes: [ENTITY_TYPES.T],
+      multi: false,
+      type: FIELD_TYPES.PICK_LIST,
+      pickListId: languagePickListId,
+      system: true,
+      inherit: false,
+    });
+    DataCategories.insert({
       name: 'eats',
       entityTypes: [ENTITY_TYPES.C],
       targetEntityTypes: [ENTITY_TYPES.C],
@@ -129,6 +162,7 @@ namespace  server {
 
     const domains = getDescendantPickListItems(domainPickList);
     const states = getDescendantPickListItems(statusPickList);
+    const languages = getDescendantPickListItems(languagePickList);
 
     Entities.remove({});
     const start = Date.now();
@@ -167,6 +201,7 @@ namespace  server {
           name: chance.pick([name, nameUp]),
           notes: chance.pick(dummySentences),
           status: [chance.pick(states).name],
+          _language: [chance.pick(languages).name],
         };
       }
     }

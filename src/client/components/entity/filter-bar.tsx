@@ -66,7 +66,7 @@ class FilterBarComponent extends MeteorDataComponent<FilterBarProps, {}, FilterB
 
   renderMenuItem(field: DataCategory) {
     return <li key={field.name}>
-      <a href="#" onClick={ev => this.onClickMenuItem(ev,field)}>{field.name}</a>
+      <a href="#" onClick={ev => this.onClickMenuItem(ev,field)}>{toDisplayName(field.name)}</a>
     </li>;
   }
 }
@@ -101,7 +101,7 @@ class FilterBarItem extends React.Component<FilterBarItemProps, {}> {
     }
     const options = createSelectOptionsFromPickList(pickList);
     return <div className="filterBarItem">
-      <label>{field.name}</label>
+      <label>{toDisplayName(field.name)}</label>
       <Select
         name={field.name}
         multi={true}
