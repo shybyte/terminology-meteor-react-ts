@@ -129,8 +129,6 @@ function propagateInheritedFields(modifiedEntity: Entity, field: DataCategory, r
 }
 
 
-
-
 class EntitiesFacade {
   static insert(e: EntityInsert, options: {refFields?: DataCategory[]} = {}) {
     const pimpedEntityData = pimpEntityForStorage(e) as Entity;
@@ -187,6 +185,15 @@ class EntitiesFacade {
         );
       }
     });
+  }
+
+  static removeFieldFromAllEntities(field: DataCategory) {
+    const namesToRemove = _.compact([field.name, field.backwardName]);
+    Entities.update(
+      {},
+      {$set: _.zipObject(namesToRemove.map(k => [k, null]))}, // $unset did not worked (no reactivity) so we set it to null
+      {multi: true}
+    );
   }
 
 }

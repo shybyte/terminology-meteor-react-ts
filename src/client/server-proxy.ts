@@ -10,13 +10,13 @@ class ServerProxy implements ServerMethods {
   updateEntity(_id: string, e: EntityUpdate) {
   }
 
+  deleteEntity(_id: string) {
+  }
+
   createField(field: DataCategory) {
   }
 
-  deleteField(field: DataCategory) {
-  }
-
-  deleteEntity(_id: string) {
+  deleteField(_id: string) {
   }
 }
 

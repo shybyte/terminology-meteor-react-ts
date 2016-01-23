@@ -7,10 +7,14 @@ const commandQueue: Command[] = [];
 
 function executeNextCommandInQueue() {
   const command = commandQueue.shift();
-  if (command) {
-    const method: Function = (serverMethods as any)[command.methodName];
-    // console.log('Executing Command: ', command.methodName, command.args);
-    method(...command.args);
+  try {
+    if (command) {
+      const method: Function = (serverMethods as any)[command.methodName];
+      // console.log('Executing Command: ', command.methodName, command.args);
+      method(...command.args);
+    }
+  } catch (error) {
+    console.error(error);
   }
   Meteor.setTimeout(executeNextCommandInQueue, 1);
 }
@@ -24,8 +28,8 @@ const serverMethods: ServerMethods = {
   createField(field: DataCategory) {
     DataCategories.insert(field);
   },
-  deleteField(field: DataCategory) {
-    DataCategories.remove(field._id);
+  deleteField(_id: string) {
+    FieldsFacade.deleteField(_id);
   },
 };
 

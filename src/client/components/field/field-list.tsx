@@ -18,7 +18,7 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
   }
 
   private deleteField(field: DataCategory): any {
-    serverProxy.deleteField(field);
+    serverProxy.deleteField(field._id);
   }
 
   render() {
