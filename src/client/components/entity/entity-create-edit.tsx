@@ -53,7 +53,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
   }
 
   onNameInput() {
-    this.setFieldValue({name: 'name'}, (this.refs['name'] as HTMLInputElement).value);
+    this.setFieldValue('name', (this.refs['name'] as HTMLInputElement).value);
     this.setState({successMessage: false});
     this.validate();
   }
@@ -88,36 +88,44 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
   }
 
   onChangePickListItem(field: DataCategory, option: PickListSelectOption | PickListSelectOption[]) {
-    this.setFieldValue(field, Array.isArray(option) ? option.map(o => o.value) : [option.value]);
+    if (!option) {
+      this.setFieldValue(field.name, []);
+      return;
+    }
+    this.setFieldValue(field.name, Array.isArray(option) ? option.map(o => o.value) : [option.value]);
   }
 
-  onChangeReferences(field: DataCategory, options: MiniEntitySelectOption[]) {
+  onChangeReferences(fieldName: string, options: MiniEntitySelectOption | MiniEntitySelectOption[]) {
     console.log('onChangeReferences', options);
-    this.setFieldValue(field, options.map(o => o.entity));
+    if (!options) {
+      this.setFieldValue(fieldName, []);
+      return;
+    }
+    this.setFieldValue(fieldName, Array.isArray(options) ? options.map(o => o.entity) : [options.entity]);
   }
 
   onChangeTextField(field: DataCategory, ev: React.SyntheticEvent) {
     const value = (ev.target as HTMLInputElement).value;
-    this.setFieldValue(field, value);
+    this.setFieldValue(field.name, value);
   }
 
-  setFieldValue(field: {name: string}, value: string | any[]) {
+  setFieldValue(name: string, value: string | any[]) {
     this.setState({
-      modifiedFieldValues: assign(this.state.modifiedFieldValues, {[field.name]: value})
+      modifiedFieldValues: assign(this.state.modifiedFieldValues, {[name]: value})
     });
   }
 
-  getReferencesOption(field: DataCategory, input: string, callback: Function) {
+  getReferencesOption(entityTypes: string[], input: string, callback: Function) {
     const limit = 10;
-    console.log('getReferencesOption:', input);
+    console.log('getReferencesOption:', input, entityTypes);
     // This timeout prevents a not loading bug on page reload.
     setTimeout(() => {
       const subscription = Meteor.subscribe(PUBLICATIONS.miniEntities, {
         nameFilterText: input,
-        types: field.targetEntityTypes,
+        types: entityTypes,
         limit
       }, () => {
-        const selector = assign(createNameSelector(input), {type: {$in: field.targetEntityTypes}});
+        const selector = assign(createNameSelector(input), {type: {$in: entityTypes}});
         console.log('selector ', selector);
         const entities = Entities.find(selector, {sort: {_lowercase_name: 1}, limit}).fetch();
         console.log('getReferencesOption result:', entities);
@@ -146,7 +154,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
 
     const isNew = this.isNew();
 
-    function renderFieldInput(field: DataCategory) {
+    function renderFieldInput(field: DataCategory, backward: boolean) {
       const fieldName = field.name;
       const modifiedFieldValues = self.state.modifiedFieldValues;
       const fieldValue = modifiedFieldValues[fieldName] !== undefined ? modifiedFieldValues[fieldName] : entity[fieldName];
@@ -166,35 +174,56 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
             onChange={(option: PickListSelectOption) => self.onChangePickListItem(field, option)}
           />;
         case FIELD_TYPES.REFERENCE:
-          const references = fieldValue as MiniEntity[] || [];
-          console.log('references:', references);
+          const backwardName = field.backwardName;
+          const references = (backward ? modifiedFieldValues[backwardName] !== undefined ? modifiedFieldValues[backwardName] : entity[backwardName]
+              : fieldValue) as MiniEntity[] || [];
+          console.log('references:', field, backward, references);
           const selectedOptions = references.map(e => ({
             label: e.name,
             value: e._id,
             entity: e
           }));
+          const entityTypes = backward ? field.entityTypes : field.targetEntityTypes;
+          const refFieldName = backward ? backwardName : fieldName;
+          const multi = backward ? field.backwardMulti : field.multi;
           return <Select.Async
-            id={fieldName}
-            multi={true}
-            name={fieldName}
-            value={selectedOptions}
-            loadOptions={self.getReferencesOption.bind(self, field)}
-            onChange={(options: any) => self.onChangeReferences(field, options)}
+            id={refFieldName}
+            multi={multi}
+            name={refFieldName}
+            value={multi ? selectedOptions : selectedOptions[0]}
+            loadOptions={(input: string, callback: Function) =>  self.getReferencesOption(entityTypes, input, callback)}
+            onChange={(options: any) => self.onChangeReferences(refFieldName, options)}
           />;
       }
     }
 
-    function renderField(dataCategory: DataCategory) {
-      const fieldName = dataCategory.name;
-      return <div className="form-group" key={fieldName}>
-        <label htmlFor={fieldName}>{fieldName}:</label>
-        {renderFieldInput(dataCategory)}
-      </div>;
+    function renderField(field: DataCategory) {
+      const fieldElements: React.ReactElement<any>[] = [];
+
+      if (_.contains(field.entityTypes, entity.type)) {
+        const fieldName = field.name;
+        fieldElements.push(<div className="form-group" key={fieldName}>
+          <label htmlFor={fieldName}>{toDisplayName(fieldName)}:</label>
+          {renderFieldInput(field, false)}
+        </div>);
+      }
+
+      if (field.backwardName && _.contains(field.targetEntityTypes, entity.type)) {
+        fieldElements.push(<div className="form-group" key={field.backwardName}>
+            <label htmlFor={field.backwardName}>{toDisplayName(field.backwardName)}:</label>
+            {renderFieldInput(field, true)}
+          </div>
+        );
+      }
+
+      return fieldElements;
     }
 
     const typeName = this.getTypeName();
     const title = isNew ? `Create new ${typeName}` : `Edit ${typeName} "${this.props.entity.name}"`;
-    const editableFields = this.data.dataCategories.filter(f => _.contains(f.entityTypes, this.props.entity.type));
+    const editableFields = this.data.dataCategories.filter(f =>
+      _.contains(f.entityTypes, this.props.entity.type) || _.contains(f.targetEntityTypes, this.props.entity.type)
+    );
 
     return (
       <div className="editEntity">

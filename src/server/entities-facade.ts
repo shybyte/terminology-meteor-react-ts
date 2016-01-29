@@ -55,6 +55,9 @@ function removeReferencesInOtherEntitiesIfNeeded(modifiedEntity: Entity, field: 
 }
 
 function removeEntityRef(entityIDs: string[], fieldName: string, entityID: string) {
+  if (_.isEmpty(entityIDs)) {
+    return;
+  }
   Entities.update(
     {_id: {$in: entityIDs}},
     {$pull: {[fieldName]: {_id: entityID}}},
@@ -108,24 +111,36 @@ function propagateInheritedFields(modifiedEntity: Entity, field: DataCategory, r
     // Remove inherited fields in children
     Entities.update(
       {_id: {$in: removedReferencedEntityIDs}},
-      {$set: _.zipObject(keysToInherit.map(k => [k, null]))}, // $unset did not worked (no reactivity) so we set it to null
+      createUnsetKeysModifier(keysToInherit),
       {multi: true}
     );
   }
 
 
-  const backwardRefs = modifiedEntity[field.backwardName] as MiniEntity[];
-  if (!_.isEmpty(backwardRefs)) {
-    // inherit from "parent"
-    const parent = Entities.findOne(backwardRefs[0]._id);
-    if (parent) {
-      const inheritUpdateSpec = _.pick(parent, keysToInherit);
+  if (modifiedEntity.type === ENTITY_TYPES.T) {
+    const backwardRefs = modifiedEntity[field.backwardName] as MiniEntity[];
+    if (_.isEmpty(backwardRefs)) {
+      // unset fields inherited from parent
       Entities.update(
         {_id: modifiedEntity._id},
-        {$set: inheritUpdateSpec}
+        createUnsetKeysModifier(keysToInherit)
       );
+    } else {
+      // inherit from "parent"
+      const parent = Entities.findOne(backwardRefs[0]._id);
+      if (parent) {
+        const inheritUpdateSpec = _.pick(parent, keysToInherit);
+        Entities.update(
+          {_id: modifiedEntity._id},
+          {$set: inheritUpdateSpec}
+        );
+      }
     }
   }
+}
+
+function createUnsetKeysModifier(keys: string[]) {
+  return {$set: _.zipObject(keys.map(k => [k, null]))}; // $unset did not worked (no reactivity) so we set it to null
 }
 
 
@@ -160,6 +175,10 @@ class EntitiesFacade {
       removeReferencesInOtherEntitiesIfNeeded(modifiedEntity, field, newReferencedEntityIDs);
       const removedIds = _.without(oldReferencedEntityIDs, ...newReferencedEntityIDs);
       removeEntityRef(removedIds, backwardName, modifiedEntity._id);
+      if (field.backwardName) {
+        const removedIdsBackward = _.without(getReferencedIds(oldEntity, backwardName), ...getReferencedIds(modifiedEntity, backwardName));
+        removeEntityRef(removedIdsBackward, fieldName, modifiedEntity._id);
+      }
       propagateInheritedFields(modifiedEntity, field, newReferencedEntityIDs, removedIds);
     });
   }
@@ -191,7 +210,7 @@ class EntitiesFacade {
     const namesToRemove = _.compact([field.name, field.backwardName]);
     Entities.update(
       {},
-      {$set: _.zipObject(namesToRemove.map(k => [k, null]))}, // $unset did not worked (no reactivity) so we set it to null
+      createUnsetKeysModifier(namesToRemove),
       {multi: true}
     );
   }
