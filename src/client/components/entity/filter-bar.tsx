@@ -13,6 +13,7 @@ interface EntityFilter {
 }
 
 interface FilterBarProps {
+  entityType: string;
   filters: EntityFilter[];
   addFilter(filter: EntityFilter): void;
   changeFilter(filter: EntityFilter): void;
@@ -44,12 +45,14 @@ class FilterBarComponent extends MeteorDataComponent<FilterBarProps, {}, FilterB
 
 
   render() {
-    const pickListFields = this.data.fields.filter(f => f.type === FIELD_TYPES.PICK_LIST);
+    const entityType = this.props.entityType;
+    const pickListFields = this.data.fields.filter(f => hasFilterableField(entityType, f));
+    const activeFilters = keepMeaningfulFilters(this.props.filters, entityType);
     return <div className="filterBar">
-      {this.props.filters.map((filter,i) => <FilterBarItem key={i + ''} filter={filter}
-                                                           pickLists={this.data.pickLists}
-                                                           changeFilter={this.onFilterChanged}
-                                                           removeFilter={this.props.removeFilter}/>)}
+      {activeFilters.map((filter,i) => <FilterBarItem key={i + ''} filter={filter}
+                                                      pickLists={this.data.pickLists}
+                                                      changeFilter={this.onFilterChanged}
+                                                      removeFilter={this.props.removeFilter}/>)}
 
       <div className="btn-group">
         <button type="button" className="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
@@ -114,6 +117,14 @@ class FilterBarItem extends React.Component<FilterBarItemProps, {}> {
   }
 }
 
+function hasFilterableField(entityType: string, field: DataCategory) {
+  return field.type === FIELD_TYPES.PICK_LIST && (entityType === ENTITY_TYPES.T || _.contains(field.entityTypes, entityType));
+}
+
+function keepMeaningfulFilters(filters: EntityFilter[], entityType: string) {
+  return filters.filter(f => hasFilterableField(entityType, f.field));
+}
 
 const FilterBar = mixinReactMeteorData(FilterBarComponent);
 this.FilterBar = FilterBar;
+this.keepMeaningfulFilters = keepMeaningfulFilters;

@@ -42,7 +42,7 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
 
     const props: EntitySearchProps = {
       queryMode: s.queryMode,
-      fieldFilters: s.filters,
+      fieldFilters: keepMeaningfulFilters(s.filters, this.props.type),
       type: this.props.type,
     };
 
@@ -251,7 +251,7 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
           />
 
           <FilterBar filters={s.filters} addFilter={this.addFilter} changeFilter={this.changeFilter}
-                     removeFilter={this.removeFilter}/>
+                     removeFilter={this.removeFilter} entityType={type}/>
 
           {this.renderColumnSelector()}
 
