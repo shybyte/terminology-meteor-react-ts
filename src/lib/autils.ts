@@ -55,6 +55,20 @@ function createNameSelector(filterText: string, mode: QueryMode = QueryMode.NAME
   }
 }
 
+interface EntitySelectorArgs {
+  nameFilterText: string;
+  types: string[];
+  ignoreEntities: string[];
+  limit?: number;
+}
+
+function createEntitySelector(args: EntitySelectorArgs) {
+  return _.assign({},
+    createNameSelector(args.nameFilterText),
+    {type: {$in: args.types}},
+    _.isEmpty(args.ignoreEntities) ? {} : {_id: {$nin: args.ignoreEntities}});
+}
+
 function getDescendantPickListItems(pickList: PickListItem): PickListItem[] {
   if (!pickList) {
     return [];
@@ -161,3 +175,4 @@ this.getDescendantPickListItems = getDescendantPickListItems;
 this.getCheckBoxRefValue = getCheckBoxRefValue;
 this.localizeEntityType = localizeEntityType;
 this.toDisplayName = toDisplayName;
+this.createEntitySelector = createEntitySelector;

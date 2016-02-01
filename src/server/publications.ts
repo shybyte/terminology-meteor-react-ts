@@ -9,8 +9,8 @@ Meteor.publish(PUBLICATIONS.entities, (parameters: any = {}) => {
 });
 
 
-Meteor.publish(PUBLICATIONS.miniEntities, (parameters: any = {}) => {
-  const selector = assign(createNameSelector(parameters.nameFilterText), {type: {$in: parameters.types}});
+Meteor.publish(PUBLICATIONS.miniEntities, (parameters: EntitySelectorArgs) => {
+  const selector = createEntitySelector(parameters);
   // console.log('publish ', selector);
   return Entities.find(selector, {
     fields: {
