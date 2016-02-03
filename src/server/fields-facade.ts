@@ -24,7 +24,10 @@ function ensureFieldIndex(field: DataCategory) {
 
 const FieldsFacade = {
   insert(field: DataCategory) {
-    DataCategories.insert(field);
+    DataCategories.insert(field.type === FIELD_TYPES.REFERENCE ?
+      assign(field, { backwardMulti: true}) :
+      field
+    );
     ensureFieldIndex(field);
   },
   deleteField(_id: string) {

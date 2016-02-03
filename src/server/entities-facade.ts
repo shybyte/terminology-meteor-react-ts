@@ -40,6 +40,7 @@ function removeReferencesInOtherEntitiesIfNeeded(modifiedEntity: Entity, field: 
   if (field.backwardMulti || _.isEmpty(referencedIds)) {
     return;
   }
+  // This works currently only for the terms/concept relationship.
   Entities.update(
     {
       _id: {$ne: modifiedEntity._id},
