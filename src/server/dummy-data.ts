@@ -90,7 +90,7 @@ namespace  server {
 
     DataCategories.remove({});
 
-    DataCategories.insert({
+    FieldsFacade.insert({
       name: 'description',
       type: FIELD_TYPES.TEXT,
       entityTypes: [ENTITY_TYPES.C],
@@ -98,7 +98,7 @@ namespace  server {
       system: false,
       inherit: false,
     });
-    DataCategories.insert({
+    FieldsFacade.insert({
       name: 'notes',
       type: FIELD_TYPES.TEXT,
       entityTypes: [ENTITY_TYPES.T],
@@ -107,7 +107,7 @@ namespace  server {
       inherit: false,
     });
 
-    DataCategories.insert({
+    FieldsFacade.insert({
       name: 'domain',
       entityTypes: [ENTITY_TYPES.C],
       multi: true,
@@ -116,7 +116,7 @@ namespace  server {
       system: false,
       inherit: false,
     });
-    DataCategories.insert({
+    FieldsFacade.insert({
       name: 'status',
       entityTypes: [ENTITY_TYPES.T],
       multi: false,
@@ -125,7 +125,7 @@ namespace  server {
       system: false,
       inherit: false,
     });
-    DataCategories.insert({
+    FieldsFacade.insert({
       name: '_language',
       entityTypes: [ENTITY_TYPES.T],
       multi: false,
@@ -134,7 +134,7 @@ namespace  server {
       system: true,
       inherit: false,
     });
-    DataCategories.insert({
+    FieldsFacade.insert({
       name: 'eats',
       entityTypes: [ENTITY_TYPES.C],
       targetEntityTypes: [ENTITY_TYPES.C],
@@ -145,7 +145,7 @@ namespace  server {
       system: false,
       inherit: false,
     });
-    DataCategories.insert({
+    FieldsFacade.insert({
       name: 'similar',
       entityTypes: [ENTITY_TYPES.C],
       targetEntityTypes: [ENTITY_TYPES.C],
@@ -156,7 +156,7 @@ namespace  server {
       inherit: false,
     });
 
-    DataCategories.insert(TERMS_REFERENCE);
+    FieldsFacade.insert(TERMS_REFERENCE);
 
     const refFields = DataCategories.find({type: FIELD_TYPES.REFERENCE}).fetch();
 
@@ -178,16 +178,17 @@ namespace  server {
     const miniEntityById: {[key: string] : MiniEntity} = {};
 
     function createRandomEntity(type: string): EntityInsert {
-      const eatsIDs = pick(entityIds, chance.d4() - 1);
-      const eatsEntities = eatsIDs.map(id => miniEntityById[id]);
-      const similarIDs = pick(entityIds, chance.d4() - 1);
-      const similarEntities = similarIDs.map(id => miniEntityById[id]);
       const name = chance.word();
       const nameUp = name.slice(0, 1).toUpperCase() + name.slice(1);
       if (type === ENTITY_TYPES.C) {
+        // TODO: Picking stuff is slow!
+        const eatsIDs = pick(entityIds, chance.d4() - 1);
+        const eatsEntities = eatsIDs.map(id => miniEntityById[id]);
+        const similarIDs = pick(entityIds, chance.d4() - 1);
+        const similarEntities = similarIDs.map(id => miniEntityById[id]);
         return {
           type: type,
-          name: chance.pick([name, nameUp]),
+          name: chance.pick([name, nameUp]) + ' ' + chance.word(),
           description: chance.pick(dummySentences),
           domain: chance.pick(dummyDomainSets),
           eats: eatsEntities,
@@ -197,8 +198,7 @@ namespace  server {
         return {
           type: type,
           [TERMS_REFERENCE.backwardName]: chance.bool() ? [] : [chance.pick(miniConcepts)],
-          // [TERMS_REFERENCE.backwardName]: [chance.pick(miniConcepts)],
-          name: chance.pick([name, nameUp]),
+          name: chance.pick([name, nameUp]) + ' ' + chance.word(),
           notes: chance.pick(dummySentences),
           status: [chance.pick(states).name],
           _language: [chance.pick(languages).name],
@@ -206,7 +206,15 @@ namespace  server {
       }
     }
 
-    _.range(20).forEach(() => {
+    let startTime = Date.now();
+    _.range(201).forEach((i) => {
+      if (i % 100 === 0) {
+        console.log(`Adding concept ${i} ...`);
+        if (i > 0) {
+          console.log('Time for last chunk:', Date.now() - startTime);
+          startTime = Date.now();
+        }
+      }
       const newEntityData = createRandomEntity(ENTITY_TYPES.C);
       const id = EntitiesFacade.insert(newEntityData, {refFields});
       entityIds.push(id);
@@ -215,7 +223,15 @@ namespace  server {
       miniConcepts.push(miniEntity);
     });
 
-    _.range(100).forEach(() => {
+    startTime = Date.now();
+    _.range(10000).forEach((i) => {
+      if (i % 100 === 0) {
+        console.log(`Adding term ${i} ...`);
+        if (i > 0) {
+          console.log('Time for last chunk:', Date.now() - startTime);
+          startTime = Date.now();
+        }
+      }
       const newEntityData = createRandomEntity(ENTITY_TYPES.T);
       const id = EntitiesFacade.insert(newEntityData, {refFields});
       entityIds.push(id);

@@ -155,6 +155,7 @@ class EntitiesFacade {
       propagateInheritedFields(entity, field, referencedEntityIDs);
     }, options);
     return entityId;
+    // return _.uniqueId();
   }
 
   static update(_id: string, entityUpdate: EntityUpdate) {
