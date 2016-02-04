@@ -175,7 +175,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
           />;
         case FIELD_TYPES.REFERENCE:
           const backwardName = field.backwardName;
-          const references = (backward ? modifiedFieldValues[backwardName] !== undefined ? modifiedFieldValues[backwardName] : entity[backwardName]
+          const references = (backward ? (modifiedFieldValues[backwardName] !== undefined ? modifiedFieldValues[backwardName] : entity[backwardName])
               : fieldValue) as MiniEntity[] || [];
           const selectedOptions = references.map(e => ({
             label: e.name,
@@ -197,23 +197,55 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
       }
     }
 
+    function renderFieldReadOnly(field: DataCategory, backward: boolean) {
+      const fieldName = field.name;
+      const modifiedFieldValues = self.state.modifiedFieldValues;
+      const fieldValue = modifiedFieldValues[fieldName] !== undefined ? modifiedFieldValues[fieldName] : entity[fieldName];
+      switch (field.type) {
+        case FIELD_TYPES.TEXT:
+          return <div>{fieldValue}</div>;
+        case FIELD_TYPES.PICK_LIST:
+          return <div>{((fieldValue || []) as string[]).join(', ')}</div>;
+        case FIELD_TYPES.REFERENCE:
+          const backwardName = field.backwardName;
+          const refs = (backward ? (modifiedFieldValues[backwardName] !== undefined ? modifiedFieldValues[backwardName] : entity[backwardName])
+              : fieldValue) as MiniEntity[] || [];
+          return <div className="referencesReadOnly">
+            {refs.map(ref => (<a key={ref._id} href={FlowRouter.path('edit', {entityId: ref._id})}>{ref.name}</a>))}
+          </div>;
+      }
+    }
+
     function renderField(field: DataCategory) {
       const fieldElements: React.ReactElement<any>[] = [];
 
+      const fieldName = field.name;
+      // TODO: Clean up this painful code duplication
       if (_.contains(field.entityTypes, entity.type)) {
-        const fieldName = field.name;
         fieldElements.push(<div className="form-group" key={fieldName}>
           <label htmlFor={fieldName}>{toDisplayName(fieldName)}:</label>
           {renderFieldInput(field, false)}
         </div>);
+      } else {
+        fieldElements.push(<div className="form-group" key={fieldName}>
+          <label>{toDisplayName(fieldName)}:</label>
+          {renderFieldReadOnly(field, false)}
+        </div>);
       }
 
-      if (field.backwardName && _.contains(field.targetEntityTypes, entity.type)) {
-        fieldElements.push(<div className="form-group" key={field.backwardName}>
-            <label htmlFor={field.backwardName}>{toDisplayName(field.backwardName)}:</label>
-            {renderFieldInput(field, true)}
-          </div>
-        );
+      if (field.backwardName) {
+        if (_.contains(field.targetEntityTypes, entity.type)) {
+          fieldElements.push(<div className="form-group" key={field.backwardName}>
+              <label htmlFor={field.backwardName}>{toDisplayName(field.backwardName)}:</label>
+              {renderFieldInput(field, true)}
+            </div>
+          );
+        } else {
+          fieldElements.push(<div className="form-group" key={field.backwardName}>
+            <label>{toDisplayName(field.backwardName)}:</label>
+            {renderFieldReadOnly(field, true)}
+          </div>);
+        }
       }
 
       return fieldElements;
@@ -221,8 +253,8 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
 
     const typeName = this.getTypeName();
     const title = isNew ? `Create new ${typeName}` : `Edit ${typeName} "${this.props.entity.name}"`;
-    const editableFields = this.data.dataCategories.filter(f =>
-      _.contains(f.entityTypes, this.props.entity.type) || _.contains(f.targetEntityTypes, this.props.entity.type)
+    const displayedFields = this.data.dataCategories.filter(f =>
+      (entity.type === ENTITY_TYPES.T && !isNew) || _.contains(f.entityTypes, this.props.entity.type) || _.contains(f.targetEntityTypes, this.props.entity.type)
     );
 
     return (
@@ -235,7 +267,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
                    onInput={this.onNameInput}
                    defaultValue={entity.name}/>
           </div>
-          {editableFields.map(renderField)}
+          {displayedFields.map(renderField)}
           {s.successMessage ? this.renderSuccessMessage() : ''}
           {s.errorMessage ? this.renderErrorMessage(s.errorMessage) : ''}
           <button className="btn btn-success">{isNew ? 'Create' : 'Save'}</button>

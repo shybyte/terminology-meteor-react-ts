@@ -38,16 +38,16 @@ class EntityRow extends React.Component<EntityRowProps, {}> {
 
     switch (field.type) {
       case FIELD_TYPES.PICK_LIST:
-        const values = value as any[];
+        const values = value as string[];
         return ul({},
           values.map((value, i) =>
             li({key: i + ''}, value + '')
           ));
       case FIELD_TYPES.REFERENCE:
-        const refValues = value as any[];
+        const refValues = value as MiniEntity[];
         return ul({},
-          refValues.map((e, i) =>
-            li({key: i + ''},
+          refValues.map((e) =>
+            li({key: e._id},
               a({href: FlowRouter.path('edit', {entityId: e._id})}, e.name)
             )
           ));
