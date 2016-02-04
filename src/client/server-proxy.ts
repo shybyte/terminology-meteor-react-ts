@@ -18,6 +18,14 @@ class ServerProxy implements ServerMethods {
 
   deleteField(_id: string) {
   }
+
+  updatePickListName(_id: string, newName: string) {
+  };
+
+  addPickListItemSister(pickListId: string, brotherItemId: string , newName: string): void {
+  }
+  addPickListItemChild(pickListId: string, parentItemId: string , newName: string): void {
+  }
 }
 
 function createServerProxy() {

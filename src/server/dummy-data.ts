@@ -14,9 +14,12 @@ namespace  server {
   }
 
   Meteor.startup(function () {
-    // if (Entities.find().count() > 0) {
-    //    return;
-    // }
+    return;
+     if (Entities.find().count() > 0) {
+        return;
+     }
+
+    Entities._ensureIndex({_lowercase_name: 1});
 
     PickLists.remove({});
 
@@ -224,7 +227,7 @@ namespace  server {
     });
 
     startTime = Date.now();
-    _.range(10000).forEach((i) => {
+    _.range(1000).forEach((i) => {
       if (i % 100 === 0) {
         console.log(`Adding term ${i} ...`);
         if (i > 0) {

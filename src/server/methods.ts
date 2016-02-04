@@ -27,6 +27,10 @@ const serverMethods: ServerMethods = {
   deleteEntity: EntitiesFacade.deleteEntity,
   createField: FieldsFacade.insert,
   deleteField: FieldsFacade.deleteField,
+
+  updatePickListName: PickListFacade.updatePickListName,
+  addPickListItemSister: PickListFacade.addPickListItemSister,
+  addPickListItemChild: PickListFacade.addPickListItemChild,
 };
 
 const queuedServerMethods = _.mapValues(serverMethods, (method, methodName) => (...args: any[]) => {

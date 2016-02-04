@@ -1,4 +1,4 @@
-/// <reference path="../../typings/meteor-typescript-libs/meteor.d.ts" />
+/// <reference path="../../../typings/meteor-typescript-libs/meteor.d.ts" />
 
 
 function ensureFieldIndex(field: DataCategory) {

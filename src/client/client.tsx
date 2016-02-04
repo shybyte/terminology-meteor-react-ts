@@ -13,7 +13,8 @@ const ROUTE_NAMES = {
   conceptCreate: 'conceptCreate',
   fieldList: 'fieldList',
   fieldCreate: 'fieldCreate',
-  pickListOverview: 'pickListOverview'
+  pickListOverview: 'pickListOverview',
+  pickListEdit: 'pickListEdit'
 };
 
 function renderEntityList(type: string) {
@@ -46,6 +47,13 @@ FlowRouter.route('/edit/:entityId', {
   name: ROUTE_NAMES.termEdit,
   action(params: any) {
     ReactLayout.render(MainLayout, {content: <EditEntity entityId={params.entityId}/>});
+  }
+});
+
+FlowRouter.route('/edit-pick-list/:pickListId', {
+  name: ROUTE_NAMES.pickListEdit,
+  action(params: any) {
+    ReactLayout.render(MainLayout, {content: <PickListEdit pickListId={params.pickListId}/>});
   }
 });
 

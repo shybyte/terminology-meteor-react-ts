@@ -176,3 +176,4 @@ this.getCheckBoxRefValue = getCheckBoxRefValue;
 this.localizeEntityType = localizeEntityType;
 this.toDisplayName = toDisplayName;
 this.createEntitySelector = createEntitySelector;
+this.getPickListItem = getPickListItem
