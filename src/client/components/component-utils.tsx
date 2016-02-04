@@ -3,4 +3,11 @@ function renderPickListItem(option: PickListSelectOption) {
   return <span style={{ paddingLeft: paddingLeft }}>{option.label}</span>;
 }
 
+function renderReferenceReactSelectValue({entity}: MiniEntitySelectOption) {
+  const href = FlowRouter.path('edit', {entityId: entity._id});
+  // FIXME: Click on Link opens first the selector, second click works.
+  return <a href={href}>{entity.name}</a>;
+}
+
 this.renderPickListItem = renderPickListItem;
+this.renderReferenceReactSelectValue = renderReferenceReactSelectValue;

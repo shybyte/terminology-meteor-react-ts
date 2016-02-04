@@ -117,7 +117,6 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
 
   getReferencesOption(entityTypes: string[], input: string, callback: Function) {
     const limit = 10;
-    console.log('getReferencesOption:', input, entityTypes);
     // This timeout prevents a not loading bug on page reload.
     setTimeout(() => {
       const ignoreEntities = [this.props.entity._id].filter(_.isString);
@@ -129,9 +128,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
       };
       const subscription = Meteor.subscribe(PUBLICATIONS.miniEntities, searchParameters, () => {
         const selector = createEntitySelector(searchParameters);
-        console.log('selector ', selector);
         const entities = Entities.find(selector, {sort: {_lowercase_name: 1}, limit}).fetch();
-        console.log('getReferencesOption result:', entities);
         const options: MiniEntitySelectOption [] = entities.map(e => ({
           value: e._id,
           label: e.name,
@@ -180,7 +177,6 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
           const backwardName = field.backwardName;
           const references = (backward ? modifiedFieldValues[backwardName] !== undefined ? modifiedFieldValues[backwardName] : entity[backwardName]
               : fieldValue) as MiniEntity[] || [];
-          console.log('references:', field, backward, references);
           const selectedOptions = references.map(e => ({
             label: e.name,
             value: e._id,
@@ -194,6 +190,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
             multi={multi}
             name={refFieldName}
             value={multi ? selectedOptions : selectedOptions[0]}
+            valueRenderer={renderReferenceReactSelectValue}
             loadOptions={(input: string, callback: Function) =>  self.getReferencesOption(entityTypes, input, callback)}
             onChange={(options: any) => self.onChangeReferences(refFieldName, options)}
           />;
