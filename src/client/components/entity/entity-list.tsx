@@ -10,6 +10,7 @@ interface EntityListData {
   dataCategories: DataCategory[];
   entities: EntitySearchResult[];
   entitiesCountComplete: number;
+  isLoadedUntilLimit: boolean;
 }
 
 interface EntityListState {
@@ -22,10 +23,11 @@ interface EntityListState {
 
 const FILTER_KEY = 'filter';
 const ACTIVE_COLUMNS_KEY = 'activeColumns';
-const DEFAULT_LIMIT = 10;
-const DEFAULT_LIMIT_INCREASE = 10;
+const DEFAULT_LIMIT_INCREASE = 20;
+const DEFAULT_LIMIT = DEFAULT_LIMIT_INCREASE;
 
 class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityListState, EntityListData> implements GetMeteorDataInterface<EntityListData> {
+  showMoreResultsIfNeededTimer: number;
 
   getInitialState(): EntityListState {
     return {
@@ -64,6 +66,7 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
       dataCategories: DataCategories.find({}, {sort: {name: 1}}).fetch(),
       entities,
       entitiesCountComplete,
+      isLoadedUntilLimit
     };
   }
 
@@ -101,7 +104,10 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
 
   componentDidMount() {
     this.getFilterInputEl().focus();
-    $(window).scroll(this.onScroll);
+    $(window).scroll(this.showMoreResultsIfNeeded);
+    this.showMoreResultsIfNeededTimer = setInterval(() => {
+      this.showMoreResultsIfNeeded();
+    }, 1000);
 
     // We want to prevent closing of the dopdown and at the same time we need to get the values.
     const self = this;
@@ -121,7 +127,8 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
 
 
   componentWillUnmount() {
-    $(window).off('scroll', this.onScroll);
+    $(window).off('scroll', this.showMoreResultsIfNeeded);
+    clearInterval(this.showMoreResultsIfNeededTimer);
   }
 
   addFilter(filter: EntityFilter) {
@@ -149,6 +156,10 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
         activeColumns: this.loadActiveColumns(newProps.type)
       });
     }
+  }
+
+  componentDidUpdate() {
+    this.showMoreResultsIfNeeded();
   }
 
   componentWillMount() {
@@ -188,25 +199,18 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
     });
   }
 
-  onScroll() {
+  showMoreResultsIfNeeded() {
     const target = $(this.refs['showMoreResults']);
     if (!target.length) {
       return;
     }
 
     const threshold = $(window).scrollTop() + $(window).height() * 1.5 - target.height();
-
-    if (target.offset().top < threshold) {
-      if (!target.data("visible")) {
-        target.data("visible", true);
-        this.setState({
-          limit: this.state.limit + DEFAULT_LIMIT_INCREASE
-        });
-      }
-    } else {
-      if (target.data("visible")) {
-        target.data("visible", false);
-      }
+    if (target.offset().top < threshold && this.data.isLoadedUntilLimit) {
+      console.log('Showmore');
+      this.setState({
+        limit: this.state.limit + DEFAULT_LIMIT_INCREASE
+      });
     }
   }
 
