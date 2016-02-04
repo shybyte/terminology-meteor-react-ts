@@ -12,7 +12,8 @@ const ROUTE_NAMES = {
   entityCreate: 'entityCreate',
   conceptCreate: 'conceptCreate',
   fieldList: 'fieldList',
-  fieldCreate: 'fieldCreate'
+  fieldCreate: 'fieldCreate',
+  pickListOverview: 'pickListOverview'
 };
 
 function renderEntityList(type: string) {
@@ -77,6 +78,13 @@ FlowRouter.route('/create/field', {
   }
 });
 
+
+FlowRouter.route('/picklists', {
+  name: ROUTE_NAMES.pickListOverview,
+  action() {
+    ReactLayout.render(MainLayout, {content: <PickListOverview />});
+  }
+});
 
 FlowRouter.notFound = {
   action() {
