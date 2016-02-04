@@ -49,7 +49,7 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
   }
 
   renderTableHeader() {
-    return [<th/>].concat(this.getActiveColumns().map(col =>
+    return [<th key="commandMenu"/>].concat(this.getActiveColumns().map(col =>
       <th key={col}>
         {col}
       </th>
