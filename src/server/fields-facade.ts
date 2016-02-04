@@ -34,7 +34,9 @@ const FieldsFacade = {
     const field = DataCategories.findOne(_id);
     EntitiesFacade.removeFieldFromAllEntities(field);
     DataCategories.remove(_id);
-    ensureFullTextIndex();
+    if (field.type === FIELD_TYPES.TEXT) {
+      ensureFullTextIndex();
+    }
   }
 };
 
