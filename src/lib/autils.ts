@@ -78,20 +78,30 @@ function getDescendantPickListItems(pickList: PickListItem): PickListItem[] {
   }));
 }
 
-function getPickListItem(pickList: PickList, name: string, level = 0): PickListItem {
+interface PickListItemWithParent {
+  pickListItem: PickListItem;
+  parent: PickListItem | PickList;
+}
+
+function getPickListItemWithParent(pickList: PickList | PickListItem, name: string, level = 0, parent: (PickList | PickListItem) = null): PickListItemWithParent {
   if (!pickList) {
     return undefined;
   }
   if (level > 0 && pickList.name === name) {
-    return pickList;
+    return {pickListItem: pickList, parent};
   }
   for (const pickListItem of pickList.items) {
-    const childResult = getPickListItem(pickListItem, name, level + 1);
+    const childResult = getPickListItemWithParent(pickListItem, name, level + 1, pickList);
     if (childResult) {
       return childResult;
     }
   }
   return undefined;
+}
+
+function getPickListItem(pickList: PickList, name: string) {
+  const pickListItemWithParent = getPickListItemWithParent(pickList, name);
+  return pickListItemWithParent ? pickListItemWithParent.pickListItem : undefined;
 }
 
 function createMongoSelector(filters: EntityFilter[], pickLists: PickList[]): Mongo.Selector {
@@ -176,4 +186,5 @@ this.getCheckBoxRefValue = getCheckBoxRefValue;
 this.localizeEntityType = localizeEntityType;
 this.toDisplayName = toDisplayName;
 this.createEntitySelector = createEntitySelector;
-this.getPickListItem = getPickListItem
+this.getPickListItemWithParent = getPickListItemWithParent;
+this.getPickListItem = getPickListItem;

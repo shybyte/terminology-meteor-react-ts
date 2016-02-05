@@ -1,24 +1,35 @@
 /// <reference path="../../../typings/meteor-typescript-libs/meteor.d.ts" />
 
 
+function addToParent(pickList: PickList, parentItem: PickListItem, newName: string) {
+  parentItem.items = (parentItem.items || []).concat({name: newName, items: []});
+  PickLists.update(pickList._id, pickList);
+}
+
 const PickListFacade = {
   updatePickListName(_id: string, newName: string) {
     PickLists.update(_id, {$set: {name: newName}});
   },
 
-  addPickListItemSister(pickListId: string, brotherItemId: string , newName: string): void {
+  addPickListItemSister(pickListId: string, brotherItemId: string, newName: string): void {
+    const pickList = PickLists.findOne(pickListId);
+    const brotherItemWithParent = getPickListItemWithParent(pickList, brotherItemId);
+    if (brotherItemWithParent) {
+      const parentItem = brotherItemWithParent.parent;
+      const items = parentItem.items;
+      const indexOfBrother = items.indexOf(brotherItemWithParent.pickListItem);
+      const newItem: PickListItem = {name: newName, items: []};
+      parentItem.items = [...items.slice(0, indexOfBrother), newItem, ...items.slice(indexOfBrother)];
+      PickLists.update(pickList._id, pickList);
+    }
   },
 
-  addPickListItemChild(pickListId: string, parentItemId: string , newName: string): void {
+  addPickListItemChild(pickListId: string, parentItemId: string, newName: string): void {
     const pickList = PickLists.findOne(pickListId);
     const parentItem = getPickListItem(pickList, parentItemId);
-
-    if (!parentItem) {
-      return;
+    if (parentItem) {
+      addToParent(pickList, parentItem, newName);
     }
-
-    parentItem.items = (parentItem.items || []).concat({name: newName, items: []});
-    PickLists.update(pickListId, pickList);
   }
 };
 
