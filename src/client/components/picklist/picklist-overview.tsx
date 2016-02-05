@@ -23,7 +23,7 @@ class PickListOverviewComponent extends MeteorDataComponent<{}, PickListOverview
   }
 
   getActiveColumns() {
-    return ['name'];
+    return ['name', 'items'];
   }
 
   private deletePickList(ev: React.SyntheticEvent, pickList: PickList): any {
@@ -126,6 +126,9 @@ class PickListOverviewComponent extends MeteorDataComponent<{}, PickListOverview
         <td>
           <a
             href={FlowRouter.path(ROUTE_NAMES.pickListEdit, {pickListId: pickList._id})}>{toDisplayName(pickList.name)}</a>
+        </td>
+        <td>
+          {getDescendantPickListItems(pickList).map(item => item.name).join(', ')}
         </td>
       </tr>
     );
