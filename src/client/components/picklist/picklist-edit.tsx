@@ -19,6 +19,7 @@ interface PickListEditState {
   name?: string;
   addType?: string; // 'sister' or 'child'
   addTo?: PickListItem;
+  newPickListItemName?: string;
 }
 
 
@@ -88,6 +89,9 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
       addTo: pickListItem
     });
     this.getNewItemNameInputEl().value = '';
+    this.setState({
+      newPickListItemName: ''
+    });
     setTimeout(() => {
       this.getNewItemNameInputEl().focus();
     }, 500);
@@ -97,8 +101,21 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
     return this.refs['newPickListItemName'] as HTMLInputElement;
   }
 
+  onChangeNewPickListItemName(ev: React.SyntheticEvent) {
+    this.setState({
+      newPickListItemName: this.getNewItemNameInputEl().value
+    });
+  }
+
+  existNewPickListItemNameAlreay() {
+    return _.contains(getDescendantPickListItems(this.data.pickList).map(pi => pi.name), this.state.newPickListItemName);
+  }
+
   addPickListItem(ev: React.SyntheticEvent) {
     ev.preventDefault();
+    if (this.existNewPickListItemNameAlreay()) {
+        return;
+    }
     const newName = this.getNewItemNameInputEl().value.trim();
     $(this.refs['addDialog']).modal('hide');
     if (this.state.addType === 'sister') {
@@ -167,38 +184,49 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
                                                onClick={this.startEditName}>{pickList.name}</h3>)}
         {renderTree(pickList.items)}
 
-        <div ref="addDialog" className="modal fade" tabIndex={-1} role="dialog">
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-                <h4 className="modal-title">
-                  Add {s.addType === 'sister' ? 'sister before' : 'child to'} {s.addTo && s.addTo.name}
-                </h4>
-              </div>
-              <div className="modal-body">
-                <form action="#" onSubmit={this.addPickListItem}>
-                  <div className="form-group">
-                    <label htmlFor="newPickListItemName">Item Name:</label>
-                    <input ref="newPickListItemName" className="form-control" id="name"
-                           placeholder="Pick List Item Name"/>
-                  </div>
-                </form>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" className="btn btn-primary" onClick={this.addPickListItem}>Add</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
+        {this.renderAddDialog()}
       </div>
     );
   }
 
+  renderAddDialog() {
+    const s = this.state;
+    const nameExistAlready = this.existNewPickListItemNameAlreay();
+    return <div ref="addDialog" className="modal fade" tabIndex={-1} role="dialog">
+      <div className="modal-dialog">
+        <div className="modal-content">
+          <div className="modal-header">
+            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 className="modal-title">
+              Add {s.addType === 'sister' ? 'sister before' : 'child to'} {s.addTo && s.addTo.name}
+            </h4>
+          </div>
+          <div className="modal-body">
+            <form action="#" onSubmit={this.addPickListItem}>
+              <div className="form-group">
+                <label htmlFor="newPickListItemName">Item Name:</label>
+                {nameExistAlready ? this.renderErrorMessage('This name exist already in this pick list.') : ''}
+                <input ref="newPickListItemName" className="form-control" id="name"
+                       placeholder="Pick List Item Name" onChange={this.onChangeNewPickListItemName}/>
+              </div>
+            </form>
+          </div>
+          <div className="modal-footer">
+            <button type="button" className="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="button" className="btn btn-primary" onClick={this.addPickListItem} disabled={nameExistAlready}>Add</button>
+          </div>
+        </div>
+      </div>
+    </div>;
+  }
+
+  renderErrorMessage(errorMessage: string) {
+    return <div className="alert alert-warning" role="alert">
+      {errorMessage}
+    </div>;
+  }
 
 }
 
