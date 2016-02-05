@@ -49,7 +49,7 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
 
     const pickLists = PickLists.find({}, {sort: {name: 1}}).fetch();
 
-    const meaningfulFilters = keepMeaningfulFilters(s.filters, this.props.type);
+    const meaningfulFilters = keepMeaningfulFilters(this.fixFilter(s.filters), this.props.type);
     const sanitizedFilters = _.compact(meaningfulFilters.map(f => {
       if (f.field.type === FIELD_TYPES.PICK_LIST) {
         const pickList = _.find(pickLists, pl => pl._id === f.field.pickListId);
@@ -189,19 +189,22 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
     this.showMoreResultsIfNeeded();
   }
 
-  componentWillMount() {
-    const loadedFilters: EntityFilter[] = JSON.parse(localStorage.getItem(FILTER_KEY) || '[]');
-    const fixedFilters = _.compact(loadedFilters.map(loadedFilter => {
-      const field = DataCategories.findOne({name: loadedFilter.field.name});
+  fixFilter(filters: EntityFilter[]) {
+    return _.compact(filters.map(filter => {
+      const field = DataCategories.findOne({name: filter.field.name});
       if (!field) {
         return undefined;
       }
-      return swap(loadedFilter, lf => {
+      return swap(filter, lf => {
         lf.field = field;
       });
     }));
+  }
+
+  componentWillMount() {
+    const loadedFilters: EntityFilter[] = JSON.parse(localStorage.getItem(FILTER_KEY) || '[]');
     this.setState({
-      filters: fixedFilters,
+      filters: this.fixFilter(loadedFilters),
       activeColumns: this.loadActiveColumns(this.props.type)
     });
   }
@@ -281,7 +284,7 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
             onChange={this.onChangeQueryMode}
           />
 
-          <FilterBar filters={s.filters} addFilter={this.addFilter} changeFilter={this.changeFilter}
+          <FilterBar filters={this.fixFilter(s.filters)} addFilter={this.addFilter} changeFilter={this.changeFilter}
                      removeFilter={this.removeFilter} entityType={type}/>
 
           {this.renderColumnSelector()}
