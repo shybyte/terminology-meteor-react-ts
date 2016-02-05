@@ -30,6 +30,9 @@ class ServerProxy implements ServerMethods {
   }
   addPickList(name: string): void {
   }
+  deletePickList(_id: string): void {
+
+  }
 }
 
 function createServerProxy() {

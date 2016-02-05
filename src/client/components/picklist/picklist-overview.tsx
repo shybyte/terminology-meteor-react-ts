@@ -26,9 +26,9 @@ class PickListOverviewComponent extends MeteorDataComponent<{}, PickListOverview
     return ['name'];
   }
 
-  private deletePickList(ev: React.SyntheticEvent, pickLists: PickList): any {
+  private deletePickList(ev: React.SyntheticEvent, pickList: PickList): any {
     ev.preventDefault();
-    alert('Not implemented, sorry!');
+    serverProxy.deletePickList(pickList._id);
   }
 
   openAddDialog(ev: React.SyntheticEvent) {

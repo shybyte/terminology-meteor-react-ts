@@ -54,6 +54,15 @@ const PickListFacade = {
       name,
       items: []
     });
+  },
+
+  deletePickList(_id: string) {
+    const usedInFields = DataCategories.find({pickListId: _id}).fetch();
+    if (usedInFields.length > 0) {
+      console.error('deletePickList failed because picklist is used', _id, usedInFields);
+      return;
+    }
+    PickLists.remove(_id);
   }
 };
 
