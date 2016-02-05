@@ -217,6 +217,23 @@ class EntitiesFacade {
     );
   }
 
+  static removePickListItem(pickList: PickList, item: PickListItem) {
+    const fields =  DataCategories.find({type: FIELD_TYPES.PICK_LIST, pickListId: pickList._id}).fetch();
+    const names = [item.name, ...getDescendantPickListItems(item).map(pi => pi.name)];
+    fields.forEach(field => {
+      Entities.update(
+        {
+          [field.name]: {$in: names}
+        },
+        {
+          $pull: {
+            [field.name]: {$in: names}
+          }
+        },
+        {multi: true}
+      );
+    });
+  }
 }
 
 this.EntitiesFacade = EntitiesFacade;

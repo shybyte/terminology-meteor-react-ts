@@ -8,6 +8,7 @@ interface EntityCreateEditComponentProps {
 
 interface EntityCreateEditData {
   dataCategories: DataCategory[];
+  pickLists: PickList[];
 }
 
 interface EntityCreateEditState {
@@ -32,7 +33,8 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
 
   getMeteorData() {
     return {
-      dataCategories: DataCategories.find({}, {sort: {name: 1}}).fetch()
+      dataCategories: DataCategories.find({}, {sort: {name: 1}}).fetch(),
+      pickLists: PickLists.find({}, {sort: {name: 1}}).fetch()
     };
   }
 
@@ -154,7 +156,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
 
     const isNew = this.isNew();
 
-    function renderFieldInput(field: DataCategory, backward: boolean) {
+    const renderFieldInput = (field: DataCategory, backward: boolean) => {
       const fieldName = field.name;
       const modifiedFieldValues = self.state.modifiedFieldValues;
       const fieldValue = modifiedFieldValues[fieldName] !== undefined ? modifiedFieldValues[fieldName] : entity[fieldName];
@@ -164,7 +166,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
           return <input ref={fieldName} className="form-control" id={fieldName} value={fieldValue as string}
                         onInput={onChange} onChange={onChange}/>;
         case FIELD_TYPES.PICK_LIST:
-          const options = createSelectOptionsFromPickList(PickLists.findOne(field.pickListId));
+          const options = createSelectOptionsFromPickList(_.find(this.data.pickLists, pl => pl._id === field.pickListId));
           return <Select
             name={fieldName}
             value={field.multi ? fieldValue : (fieldValue ? fieldValue[0] : undefined)}
@@ -195,7 +197,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
             onChange={(options: any) => self.onChangeReferences(refFieldName, options)}
           />;
       }
-    }
+    };
 
     function renderFieldReadOnly(field: DataCategory, backward: boolean) {
       const fieldName = field.name;

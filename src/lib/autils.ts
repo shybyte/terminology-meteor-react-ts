@@ -113,17 +113,23 @@ function createMongoSelector(filters: EntityFilter[], pickLists: PickList[]): Mo
       return undefined;
     }
     const pickList = _.find(pickLists, pl => pl._id === filter.field.pickListId);
-    return {
-      [filter.field.name]: {
-        $in: _.unique(_.flatten(filter.values.map(filterValue => {
-          const pickListItem = getPickListItem(pickList, filterValue);
-          if (!pickListItem) {
-            return [];
-          }
-          return [pickListItem].concat(getDescendantPickListItems(pickListItem));
-        })).map(plItem => plItem.name))
+    const $in = _.unique(_.flatten(filter.values.map(filterValue => {
+      const pickListItem = getPickListItem(pickList, filterValue);
+      if (!pickListItem) {
+        return [];
       }
-    };
+      return [pickListItem].concat(getDescendantPickListItems(pickListItem));
+    })).map(plItem => plItem.name));
+
+    if ($in.length > 0) {
+      return {
+        [filter.field.name]: {
+          $in: $in
+        }
+      };
+    } else {
+      return {};
+    }
   }));
   if (selectorsToAnd.length === 0) {
     return {};

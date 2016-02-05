@@ -3,6 +3,7 @@
 
 interface FieldListData {
   dataCategories: DataCategory[];
+  pickLists: PickList[];
 }
 
 
@@ -10,6 +11,7 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
   getMeteorData() {
     return {
       dataCategories: DataCategories.find({}, {sort: {name: 1}}).fetch(),
+      pickLists: PickLists.find({}, {sort: {name: 1}}).fetch(),
     };
   }
 
@@ -57,8 +59,13 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
   }
 
   renderFields() {
-    return this.data.dataCategories.map(field =>
+    const renderPickListLink = (field: DataCategory) => {
+      const pickList = _.find(this.data.pickLists, pl => pl._id === field.pickListId);
+      return <a
+        href={FlowRouter.path(ROUTE_NAMES.pickListEdit, {pickListId: pickList._id})}>{toDisplayName(pickList.name)}</a>;
+    };
 
+    return this.data.dataCategories.map(field =>
       <tr key={field._id}>
         <td>
           {field.system ? '' : (
@@ -79,10 +86,11 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
         <td>{toDisplayName(field.name)}</td>
         <td>{field.type}</td>
         <td>{field.multi ? 'multi' : ''}</td>
-        <td>{field.pickListId ? PickLists.findOne(field.pickListId).name  :' '}</td>
+        <td>{field.pickListId ? renderPickListLink(field) :' '}</td>
       </tr>
     );
   }
+
 }
 
 

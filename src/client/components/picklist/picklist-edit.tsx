@@ -108,6 +108,11 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
     }
   }
 
+  deleteItem(ev: React.SyntheticEvent, item: PickListItem) {
+    ev.preventDefault();
+    serverProxy.deletePickListItem(this.props.pickListId, item.name);
+  }
+
   render() {
     const s = this.state;
     const pickList = this.data.pickList;
@@ -138,10 +143,15 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
             </button>
             <ul className="dropdown-menu" aria-labelledby="dropdownMenu1">
               <li>
-                <a href="#" onClick={(ev) => this.openAddChildOrSisterDialog(ev, pickListItem, 'sister')}>Add Sister Before</a>
+                <a href="#" onClick={(ev) => this.openAddChildOrSisterDialog(ev, pickListItem, 'sister')}>
+                  Add Sister Before
+                </a>
               </li>
               <li>
                 <a href="#" onClick={(ev) => this.openAddChildOrSisterDialog(ev, pickListItem, 'child')}>Add Child</a>
+              </li>
+              <li>
+                <a href="#" onClick={(ev) => this.deleteItem(ev, pickListItem)}>Delete</a>
               </li>
             </ul>
           </div>
@@ -164,7 +174,9 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
                 <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
-                <h4 className="modal-title">Add {s.addType === 'sister' ? 'sister before' : 'child to'} {s.addTo && s.addTo.name}</h4>
+                <h4 className="modal-title">
+                  Add {s.addType === 'sister' ? 'sister before' : 'child to'} {s.addTo && s.addTo.name}
+                </h4>
               </div>
               <div className="modal-body">
                 <form action="#" onSubmit={this.addPickListItem}>

@@ -31,6 +31,7 @@ const serverMethods: ServerMethods = {
   updatePickListName: PickListFacade.updatePickListName,
   addPickListItemSister: PickListFacade.addPickListItemSister,
   addPickListItemChild: PickListFacade.addPickListItemChild,
+  deletePickListItem: PickListFacade.deletePickListItem,
 };
 
 const queuedServerMethods = _.mapValues(serverMethods, (method, methodName) => (...args: any[]) => {

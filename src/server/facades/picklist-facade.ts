@@ -30,7 +30,18 @@ const PickListFacade = {
     if (parentItem) {
       addToParent(pickList, parentItem, newName);
     }
-  }
+  },
+
+  deletePickListItem(pickListId: string, parentItemName: string) {
+    const pickList = PickLists.findOne(pickListId);
+    const itemWithParent = getPickListItemWithParent(pickList, parentItemName);
+    if (itemWithParent) {
+      const parentItem = itemWithParent.parent;
+      parentItem.items = _.without(parentItem.items, itemWithParent.pickListItem);
+      PickLists.update(pickList._id, pickList);
+      EntitiesFacade.removePickListItem(pickList, itemWithParent.pickListItem);
+    }
+  },
 };
 
 

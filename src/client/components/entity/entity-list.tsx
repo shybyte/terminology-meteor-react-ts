@@ -1,6 +1,8 @@
 /// <reference path="../../../../typings/react/react-global.d.ts" />
 /// <reference path="../../../../typings/meteor-hacks.d.ts" />
 /// <reference path="../../../../typings/meteor-typescript-libs/jquery.d.ts" />
+'use strict';
+
 
 interface EntityListProps {
   type: string; // ENTITY_TYPES
@@ -11,6 +13,7 @@ interface EntityListData {
   entities: EntitySearchResult[];
   entitiesCountComplete: number;
   isLoadedUntilLimit: boolean;
+  pickLists: PickList[];
 }
 
 interface EntityListState {
@@ -42,9 +45,28 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
   getMeteorData() {
     const s = this.state;
 
+    const pickLists = PickLists.find({}, {sort: {name: 1}}).fetch();
+
+    const meaningfulFilters = keepMeaningfulFilters(s.filters, this.props.type);
+    const sanitizedFilters = _.compact(meaningfulFilters.map(f => {
+      if (f.field.type === FIELD_TYPES.PICK_LIST) {
+        const pickList = _.find(pickLists, pl => pl._id === f.field.pickListId);
+        if (pickList) {
+          return swap(f, f2 => {
+            f2.values = _.intersection(f.values, getDescendantPickListItems(pickList).map(pi => pi.name));
+          });
+          return f;
+        } else {
+          return null;
+        }
+      } else {
+        return f;
+      }
+    }));
+
     const props: EntitySearchProps = {
       queryMode: s.queryMode,
-      fieldFilters: keepMeaningfulFilters(s.filters, this.props.type),
+      fieldFilters: sanitizedFilters,
       type: this.props.type,
     };
 
@@ -66,7 +88,8 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
       dataCategories: DataCategories.find({}, {sort: {name: 1}}).fetch(),
       entities,
       entitiesCountComplete,
-      isLoadedUntilLimit
+      isLoadedUntilLimit,
+      pickLists
     };
   }
 
