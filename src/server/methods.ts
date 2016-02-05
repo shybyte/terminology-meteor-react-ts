@@ -31,6 +31,7 @@ const serverMethods: ServerMethods = {
   updatePickListName: PickListFacade.updatePickListName,
   addPickListItemSister: PickListFacade.addPickListItemSister,
   addPickListItemChild: PickListFacade.addPickListItemChild,
+  addRootPickListItem: PickListFacade.addRootPickListItem,
   deletePickListItem: PickListFacade.deletePickListItem,
 };
 

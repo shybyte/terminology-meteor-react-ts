@@ -24,6 +24,12 @@ const PickListFacade = {
     }
   },
 
+  addRootPickListItem(pickListId: string, newName: string): void {
+    const pickList = PickLists.findOne(pickListId);
+    pickList.items.push({name: newName, items: []});
+    PickLists.update(pickList._id, pickList);
+  },
+
   addPickListItemChild(pickListId: string, parentItemId: string, newName: string): void {
     const pickList = PickLists.findOne(pickListId);
     const parentItem = getPickListItem(pickList, parentItemId);

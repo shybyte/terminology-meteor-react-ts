@@ -9,5 +9,6 @@ interface ServerMethods {
   updatePickListName(_id: string, newName: string): void;
   addPickListItemSister(pickListId: string, brotherItemId: string, newName: string): void;
   addPickListItemChild(pickListId: string, parentItemId: string, newName: string): void;
+  addRootPickListItem(pickListId: string, newName: string): void;
   deletePickListItem(pickListId: string, parentItemName: string): void;
 }

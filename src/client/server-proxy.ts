@@ -2,8 +2,6 @@
  * This seemingly empty methods will be implemented in createServerProxy()
  */
 class ServerProxy implements ServerMethods {
-
-
   createEntity(e: EntityInsert) {
   }
 
@@ -25,6 +23,8 @@ class ServerProxy implements ServerMethods {
   addPickListItemSister(pickListId: string, brotherItemId: string , newName: string): void {
   }
   addPickListItemChild(pickListId: string, parentItemId: string , newName: string): void {
+  }
+  addRootPickListItem(pickListId: string, newName: string): void {
   }
   deletePickListItem(pickListId: string, parentItemName: string): void {
   }

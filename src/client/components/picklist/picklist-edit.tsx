@@ -83,11 +83,24 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
 
   openAddChildOrSisterDialog(ev: React.SyntheticEvent, pickListItem: PickListItem, addType: string) {
     ev.preventDefault();
-    $(this.refs['addDialog']).modal('show');
     this.setState({
       addType,
       addTo: pickListItem
     });
+    this.openAddDialog();
+  }
+
+  openAddRootItemDialog(ev: React.SyntheticEvent) {
+    ev.preventDefault();
+    this.setState({
+      addType: 'root',
+      addTo: null
+    });
+    this.openAddDialog();
+  }
+
+  openAddDialog() {
+    $(this.refs['addDialog']).modal('show');
     this.getNewItemNameInputEl().value = '';
     this.setState({
       newPickListItemName: ''
@@ -114,14 +127,22 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
   addPickListItem(ev: React.SyntheticEvent) {
     ev.preventDefault();
     if (this.existNewPickListItemNameAlreay()) {
-        return;
+      return;
     }
     const newName = this.getNewItemNameInputEl().value.trim();
     $(this.refs['addDialog']).modal('hide');
-    if (this.state.addType === 'sister') {
-      serverProxy.addPickListItemSister(this.props.pickListId, this.state.addTo.name, newName);
-    } else {
-      serverProxy.addPickListItemChild(this.props.pickListId, this.state.addTo.name, newName);
+    switch (this.state.addType) {
+      case 'sister':
+        serverProxy.addPickListItemSister(this.props.pickListId, this.state.addTo.name, newName);
+        break;
+      case 'child':
+        serverProxy.addPickListItemChild(this.props.pickListId, this.state.addTo.name, newName);
+        break;
+      case 'root':
+        serverProxy.addRootPickListItem(this.props.pickListId, newName);
+        break;
+      default:
+        console.error('Unknown addType');
     }
   }
 
@@ -184,13 +205,27 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
                                                onClick={this.startEditName}>{pickList.name}</h3>)}
         {renderTree(pickList.items)}
 
+        <button type="button" className="btn btn-primary" onClick={this.openAddRootItemDialog}>Add Item</button>
+
         {this.renderAddDialog()}
       </div>
     );
   }
 
-  renderAddDialog() {
+  getAddItemDialogTitle() {
     const s = this.state;
+    switch (this.state.addType) {
+      case 'sister':
+        return 'sister item before ' + (s.addTo && s.addTo.name);
+      case 'child':
+        return 'child item to ' + (s.addTo && s.addTo.name);
+      case 'root':
+      default:
+        return 'root item';
+    }
+  }
+
+  renderAddDialog() {
     const nameExistAlready = this.existNewPickListItemNameAlreay();
     return <div ref="addDialog" className="modal fade" tabIndex={-1} role="dialog">
       <div className="modal-dialog">
@@ -200,7 +235,7 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
               <span aria-hidden="true">&times;</span>
             </button>
             <h4 className="modal-title">
-              Add {s.addType === 'sister' ? 'sister before' : 'child to'} {s.addTo && s.addTo.name}
+              Add {this.getAddItemDialogTitle()}
             </h4>
           </div>
           <div className="modal-body">
@@ -215,7 +250,9 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
           </div>
           <div className="modal-footer">
             <button type="button" className="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="button" className="btn btn-primary" onClick={this.addPickListItem} disabled={nameExistAlready}>Add</button>
+            <button type="button" className="btn btn-primary" onClick={this.addPickListItem}
+                    disabled={nameExistAlready}>Add
+            </button>
           </div>
         </div>
       </div>
