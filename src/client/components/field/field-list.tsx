@@ -24,6 +24,10 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
     serverProxy.deleteField(field._id);
   }
 
+  addNewField() {
+    FlowRouter.go(ROUTE_NAMES.fieldCreate);
+  }
+
   render() {
     const activeColumns = this.getActiveColumns();
     const columnWidth = 100 / activeColumns.length;
@@ -46,6 +50,7 @@ class FieldListComponent extends MeteorDataComponent<{}, {}, FieldListData> impl
             {this.renderFields()}
           </tbody>
         </table>
+        <button type="button" className="btn btn-success" onClick={this.addNewField}>Add New Field</button>
       </div>
     );
   }

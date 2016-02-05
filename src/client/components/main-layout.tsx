@@ -25,7 +25,6 @@ class MainLayout extends React.Component<{content: any}, {}> {
                 {navItem(ROUTE_NAMES.entityCreate, 'New Term')}
                 {navItem(ROUTE_NAMES.conceptCreate, 'New Concept')}
                 {navItem(ROUTE_NAMES.fieldList, 'Fields')}
-                {navItem(ROUTE_NAMES.fieldCreate, 'New Field')}
                 {navItem(ROUTE_NAMES.pickListOverview, 'Pick Lists')}
               </ul>
             </nav>

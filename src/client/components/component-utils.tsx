@@ -9,5 +9,12 @@ function renderReferenceReactSelectValue({entity}: MiniEntitySelectOption) {
   return <a href={href}>{entity.name}</a>;
 }
 
+function renderErrorMessage(errorMessage: string) {
+  return <div className="alert alert-warning" role="alert">
+    {errorMessage}
+  </div>;
+}
+
 this.renderPickListItem = renderPickListItem;
 this.renderReferenceReactSelectValue = renderReferenceReactSelectValue;
+this.renderErrorMessage = renderErrorMessage;

@@ -130,7 +130,7 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
           {s.type === FIELD_TYPES.REFERENCE ?  this.renderReferenceSection() : ''}
 
           {s.successMessage ? this.renderSuccessMessage() : ''}
-          {s.errorMessage ? this.renderErrorMessage(s.errorMessage) : ''}
+          {s.errorMessage ? renderErrorMessage(s.errorMessage) : ''}
           <button className="btn btn-success">Create Field</button>
         </form>
       </div>
@@ -169,13 +169,6 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
       Created new Field, you can create more Fields if you want...
     </div>;
   }
-
-  renderErrorMessage(errorMessage: string) {
-    return <div className="alert alert-warning" role="alert">
-      {errorMessage}
-    </div>;
-  }
-
 }
 
 

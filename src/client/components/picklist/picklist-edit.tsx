@@ -120,13 +120,13 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
     });
   }
 
-  existNewPickListItemNameAlreay() {
+  existNewPickListItemNameAlready() {
     return _.contains(getDescendantPickListItems(this.data.pickList).map(pi => pi.name), this.state.newPickListItemName);
   }
 
   addPickListItem(ev: React.SyntheticEvent) {
     ev.preventDefault();
-    if (this.existNewPickListItemNameAlreay()) {
+    if (this.existNewPickListItemNameAlready()) {
       return;
     }
     const newName = this.getNewItemNameInputEl().value.trim();
@@ -205,7 +205,7 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
                                                onClick={this.startEditName}>{pickList.name}</h3>)}
         {renderTree(pickList.items)}
 
-        <button type="button" className="btn btn-primary" onClick={this.openAddRootItemDialog}>Add Item</button>
+        <button type="button" className="btn btn-success" onClick={this.openAddRootItemDialog}>Add Item</button>
 
         {this.renderAddDialog()}
       </div>
@@ -226,7 +226,7 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
   }
 
   renderAddDialog() {
-    const nameExistAlready = this.existNewPickListItemNameAlreay();
+    const nameExistAlready = this.existNewPickListItemNameAlready();
     return <div ref="addDialog" className="modal fade" tabIndex={-1} role="dialog">
       <div className="modal-dialog">
         <div className="modal-content">
@@ -242,7 +242,7 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
             <form action="#" onSubmit={this.addPickListItem}>
               <div className="form-group">
                 <label htmlFor="newPickListItemName">Item Name:</label>
-                {nameExistAlready ? this.renderErrorMessage('This name exist already in this pick list.') : ''}
+                {nameExistAlready ? renderErrorMessage('This name exist already in this pick list.') : ''}
                 <input ref="newPickListItemName" className="form-control" id="name"
                        placeholder="Pick List Item Name" onChange={this.onChangeNewPickListItemName}/>
               </div>
@@ -256,12 +256,6 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
           </div>
         </div>
       </div>
-    </div>;
-  }
-
-  renderErrorMessage(errorMessage: string) {
-    return <div className="alert alert-warning" role="alert">
-      {errorMessage}
     </div>;
   }
 

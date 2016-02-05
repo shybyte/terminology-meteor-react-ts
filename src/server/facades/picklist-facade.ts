@@ -48,6 +48,13 @@ const PickListFacade = {
       EntitiesFacade.removePickListItem(pickList, itemWithParent.pickListItem);
     }
   },
+
+  addPickList(name: string) {
+    PickLists.insert({
+      name,
+      items: []
+    });
+  }
 };
 
 

@@ -228,7 +228,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
           <label htmlFor={fieldName}>{toDisplayName(fieldName)}:</label>
           {renderFieldInput(field, false)}
         </div>);
-      } else {
+      } else if (!field.inherit) {
         fieldElements.push(<div className="form-group" key={fieldName}>
           <label>{toDisplayName(fieldName)}:</label>
           {renderFieldReadOnly(field, false)}
@@ -242,7 +242,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
               {renderFieldInput(field, true)}
             </div>
           );
-        } else {
+        } else if (!field.inherit) {
           fieldElements.push(<div className="form-group" key={field.backwardName}>
             <label>{toDisplayName(field.backwardName)}:</label>
             {renderFieldReadOnly(field, true)}
@@ -271,7 +271,7 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
           </div>
           {displayedFields.map(renderField)}
           {s.successMessage ? this.renderSuccessMessage() : ''}
-          {s.errorMessage ? this.renderErrorMessage(s.errorMessage) : ''}
+          {s.errorMessage ? renderErrorMessage(s.errorMessage) : ''}
           <button className="btn btn-success">{isNew ? 'Create' : 'Save'}</button>
         </form>
       </div>
@@ -283,13 +283,6 @@ class EntityCreateEditComponent extends MeteorDataComponent<EntityCreateEditComp
       Created new {this.getTypeName()}, you can create more {this.getTypeName()}s if you want...
     </div>;
   }
-
-  renderErrorMessage(errorMessage: string) {
-    return <div className="alert alert-warning" role="alert">
-      {errorMessage}
-    </div>;
-  }
-
 }
 
 

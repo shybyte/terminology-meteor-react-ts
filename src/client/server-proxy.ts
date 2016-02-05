@@ -28,6 +28,8 @@ class ServerProxy implements ServerMethods {
   }
   deletePickListItem(pickListId: string, parentItemName: string): void {
   }
+  addPickList(name: string): void {
+  }
 }
 
 function createServerProxy() {

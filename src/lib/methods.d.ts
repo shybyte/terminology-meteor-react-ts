@@ -11,4 +11,5 @@ interface ServerMethods {
   addPickListItemChild(pickListId: string, parentItemId: string, newName: string): void;
   addRootPickListItem(pickListId: string, newName: string): void;
   deletePickListItem(pickListId: string, parentItemName: string): void;
+  addPickList(name: string): void;
 }
