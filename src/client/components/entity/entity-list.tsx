@@ -29,6 +29,8 @@ const ACTIVE_COLUMNS_KEY = 'activeColumns';
 const DEFAULT_LIMIT_INCREASE = 20;
 const DEFAULT_LIMIT = DEFAULT_LIMIT_INCREASE;
 
+const lastChachedSearchEntries: {[key: string]: EntitySearchResult[]} = {};
+
 class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityListState, EntityListData> implements GetMeteorDataInterface<EntityListData> {
   showMoreResultsIfNeededTimer: number;
 
@@ -82,7 +84,9 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
       (entitiesCountComplete === newFetchedEntities.length || newFetchedEntities.length === s.limit);
 
     // Display old data if new has not completely arrived, in order to avoid flickering/scroll jumping
-    const entities = isLoadedUntilLimit ? newFetchedEntities : (this.data.entities || []);
+    const entities = isLoadedUntilLimit ? newFetchedEntities : (this.data.entities || lastChachedSearchEntries[this.props.type] || []);
+
+    lastChachedSearchEntries[this.props.type] = entities;
 
     return {
       dataCategories: DataCategories.find({}, {sort: {name: 1}}).fetch(),
