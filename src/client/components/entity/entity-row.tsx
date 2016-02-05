@@ -65,12 +65,14 @@ class EntityRow extends React.Component<EntityRowProps, {}> {
 
   render() {
     const p: EntityRowProps = this.props;
-    return tr({key: p.entity._id},
+    return tr({key: p.entity.__originalId},
       (<td>
         <div className="btn-group">
-          <button type="button" className="btn btn-default iconButton dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+          <button type="button" className="btn btn-default iconButton dropdown-toggle" data-toggle="dropdown"
+                  aria-haspopup="true"
                   aria-expanded="false">
-            <span className="glyphicon glyphicon-option-vertical" title="Actions"></span></button>
+            <span className="glyphicon glyphicon-option-vertical" title="Actions"></span>
+          </button>
           <ul className="dropdown-menu dropdown-menu">
             <li>
               <a href="#" onClick={ev => this.onClickDelete(ev,p.entity)}>Delete</a>
@@ -78,9 +80,8 @@ class EntityRow extends React.Component<EntityRowProps, {}> {
           </ul>
         </div>
       </td>),
-    p.activeColumns.map(colName => td({key: colName}, this.renderCell(colName)))
-  )
-    ;
+      p.activeColumns.map(colName => td({key: colName}, this.renderCell(colName)))
+    );
   }
 }
 
