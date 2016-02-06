@@ -24,7 +24,8 @@ function ensureFieldIndex(field: DataCategory) {
 const FieldsFacade = {
   insert(field: DataCategory) {
     assertNotEmpty(field.name, 'field.name');
-    DataCategories.insert(field.type === FIELD_TYPES.REFERENCE ?
+    // HACK: Make sure that nobody creates backwardMulti: true fields aside from TERMS_REFERENCE.
+    DataCategories.insert(field.type === FIELD_TYPES.REFERENCE && field.name !== TERMS_REFERENCE.name ?
       assign(field, {backwardMulti: true}) :
       field
     );
