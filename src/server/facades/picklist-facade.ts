@@ -8,11 +8,13 @@ function addToParent(pickList: PickList, parentItem: PickListItem, newName: stri
 
 const PickListFacade = {
   updatePickListName(_id: string, newName: string) {
+    assertValidNewPickListName(newName);
     PickLists.update(_id, {$set: {name: newName}});
   },
 
   addPickListItemSister(pickListId: string, brotherItemId: string, newName: string): void {
     const pickList = PickLists.findOne(pickListId);
+    assertValidNewPickListItemName(pickList, newName);
     const brotherItemWithParent = getPickListItemWithParent(pickList, brotherItemId);
     if (brotherItemWithParent) {
       const parentItem = brotherItemWithParent.parent;
@@ -26,12 +28,14 @@ const PickListFacade = {
 
   addRootPickListItem(pickListId: string, newName: string): void {
     const pickList = PickLists.findOne(pickListId);
+    assertValidNewPickListItemName(pickList, newName);
     pickList.items.push({name: newName, items: []});
     PickLists.update(pickList._id, pickList);
   },
 
   addPickListItemChild(pickListId: string, parentItemId: string, newName: string): void {
     const pickList = PickLists.findOne(pickListId);
+    assertValidNewPickListItemName(pickList, newName);
     const parentItem = getPickListItem(pickList, parentItemId);
     if (parentItem) {
       addToParent(pickList, parentItem, newName);
@@ -50,6 +54,7 @@ const PickListFacade = {
   },
 
   addPickList(name: string) {
+    assertValidNewPickListName(name);
     PickLists.insert({
       name,
       items: []
@@ -59,7 +64,7 @@ const PickListFacade = {
   deletePickList(_id: string) {
     const usedInFields = DataCategories.find({pickListId: _id}).fetch();
     if (usedInFields.length > 0) {
-      console.error('deletePickList failed because picklist is used', _id, usedInFields);
+      console.error('deletePickList failed because picklist is used ', _id, usedInFields);
       return;
     }
     PickLists.remove(_id);

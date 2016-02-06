@@ -121,15 +121,15 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
   }
 
   existNewPickListItemNameAlready() {
-    return _.contains(getDescendantPickListItems(this.data.pickList).map(pi => pi.name), this.state.newPickListItemName);
+    return existPickListItemAlready(this.data.pickList, this.state.newPickListItemName);
   }
 
   addPickListItem(ev: React.SyntheticEvent) {
     ev.preventDefault();
-    if (this.existNewPickListItemNameAlready()) {
+    const newName = this.getNewItemNameInputEl().value.trim();
+    if (this.existNewPickListItemNameAlready() || isEmpty(newName)) {
       return;
     }
-    const newName = this.getNewItemNameInputEl().value.trim();
     $(this.refs['addDialog']).modal('hide');
     switch (this.state.addType) {
       case 'sister':
@@ -251,7 +251,7 @@ class PickListEditComponent extends MeteorDataComponent<PickListEditProps, PickL
           <div className="modal-footer">
             <button type="button" className="btn btn-default" data-dismiss="modal">Cancel</button>
             <button type="button" className="btn btn-primary" onClick={this.addPickListItem}
-                    disabled={nameExistAlready}>Add
+                    disabled={nameExistAlready || isEmpty(this.state.newPickListItemName)}>Add
             </button>
           </div>
         </div>

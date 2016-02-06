@@ -23,6 +23,7 @@ function ensureFieldIndex(field: DataCategory) {
 
 const FieldsFacade = {
   insert(field: DataCategory) {
+    assertNotEmpty(field.name, 'field.name');
     DataCategories.insert(field.type === FIELD_TYPES.REFERENCE ?
       assign(field, {backwardMulti: true}) :
       field

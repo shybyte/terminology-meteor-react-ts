@@ -59,10 +59,10 @@ class PickListOverviewComponent extends MeteorDataComponent<{}, PickListOverview
 
   addPickList(ev: React.SyntheticEvent) {
     ev.preventDefault();
-    if (this.existNewPickListNameAlready()) {
+    const newName = this.getNewPickListNameInputEl().value.trim();
+    if (this.existNewPickListNameAlready() || isEmpty(newName)) {
       return;
     }
-    const newName = this.getNewPickListNameInputEl().value.trim();
     $(this.refs['addDialog']).modal('hide');
     serverProxy.addPickList(newName);
   }
@@ -160,7 +160,7 @@ class PickListOverviewComponent extends MeteorDataComponent<{}, PickListOverview
           <div className="modal-footer">
             <button type="button" className="btn btn-default" data-dismiss="modal">Cancel</button>
             <button type="button" className="btn btn-primary" onClick={this.addPickList}
-                    disabled={nameExistAlready}>Add
+                    disabled={nameExistAlready || isEmpty(this.state.newPickListName)}>Add
             </button>
           </div>
         </div>
