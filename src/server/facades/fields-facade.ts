@@ -21,22 +21,42 @@ function ensureFieldIndex(field: DataCategory) {
   }
 }
 
-
 const FieldsFacade = {
   insert(field: DataCategory) {
     DataCategories.insert(field.type === FIELD_TYPES.REFERENCE ?
-      assign(field, { backwardMulti: true}) :
+      assign(field, {backwardMulti: true}) :
       field
     );
     ensureFieldIndex(field);
   },
+
   deleteField(_id: string) {
     const field = DataCategories.findOne(_id);
+
+    try {
+      switch (field.type) {
+        case FIELD_TYPES.TEXT:
+          ensureFullTextIndex();
+          break;
+        case FIELD_TYPES.PICK_LIST:
+          Entities._dropIndex(field.name + '_1');
+          break;
+        case FIELD_TYPES.REFERENCE:
+          Entities._dropIndex(field.name + '._id_1');
+          if (field.backwardName) {
+            Entities._dropIndex(field.backwardName + '._id_1');
+          }
+          break;
+        default:
+          console.error('Unknown field type:  ', field);
+          throw new Error('Unknown field type: ' + field.type);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
     EntitiesFacade.removeFieldFromAllEntities(field);
     DataCategories.remove(_id);
-    if (field.type === FIELD_TYPES.TEXT) {
-      ensureFullTextIndex();
-    }
   }
 };
 

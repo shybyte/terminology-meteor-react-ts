@@ -1,6 +1,10 @@
 /// <reference path="../../typings/meteor-typescript-libs/meteor.d.ts" />
+/// <reference path="../../typings/node-fibers.d.ts" />
 /// <reference path="../../typings/chance.d.ts" />
 /// <reference path="../../typings/lodash.d.ts" />
+
+const path = Npm.require('path');
+const Future = Npm.require(path.join('fibers', 'future'));
 
 namespace  server {
   const chance = new Chance();
@@ -13,13 +17,24 @@ namespace  server {
     return Array.isArray(result) ? result : [result];
   }
 
+  function dropIndexes(collection: Mongo.Collection<any>) {
+    // This function is only used by test code, not within a method, so we don't
+    // interact with the write fence.
+    const rawCollection = collection.rawCollection()
+    const future = new Future();
+    rawCollection.dropIndexes(future.resolver());
+    future.wait();
+  };
+
   Meteor.startup(function () {
     return;
-     if (Entities.find().count() > 0) {
-        return;
-     }
+     //if (DataCategories.find().count() > 0) {
+     //   return;
+     //}
 
     Entities._ensureIndex({_lowercase_name: 1});
+    Entities._ensureIndex({name: 1});
+    Entities._ensureIndex({type: 1});
 
     PickLists.remove({});
 
