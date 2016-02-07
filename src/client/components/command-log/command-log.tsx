@@ -16,7 +16,7 @@ class CommandLogComponentClass extends MeteorDataComponent<{}, {}, CommandLogDat
   }
 
   getActiveColumns() {
-    return ['command', 'arguments', 'requestTime', 'startTime', 'endTime', 'error'];
+    return ['Request Time', 'Command', 'Arguments', 'Queueing Duration', 'Duration', 'Error'];
   }
 
   componentWillMount() {
@@ -34,7 +34,7 @@ class CommandLogComponentClass extends MeteorDataComponent<{}, {}, CommandLogDat
       width: columnWidth + '%'
     };
     return (
-      <div>
+      <div className="commandLog">
         <table className="table">
           <colgroup>
             <col/>
@@ -62,19 +62,28 @@ class CommandLogComponentClass extends MeteorDataComponent<{}, {}, CommandLogDat
   }
 
   renderFields() {
-    const renderAttributeValue = (value: any) => _.isObject(value) ? JSON.stringify(value, null, 2) : value;
-
+    const renderObject = (o: {}) => o ? (<pre>{JSON.stringify(o, null, 2)}</pre>) : '';
+    const renderTime = (t: number) => new Date(t).toLocaleString();
     return this.data.commands.map(commandLogEntry => (
-      <tr>
-        {
-          this.getActiveColumns().map(col =>
-          <td key={col}>
-            <pre>
-              {renderAttributeValue((commandLogEntry as any)[col])}
-            </pre>
-          </td>
-            )
-          }
+      <tr key={commandLogEntry._id} className={commandLogEntry.error ? 'errorRow' : ''}>
+        <td>
+          {renderTime(commandLogEntry.requestTime)}
+        </td>
+        <td>
+          {commandLogEntry.command}
+        </td>
+        <td>
+          {renderObject(commandLogEntry.arguments)}
+        </td>
+        <td>
+          {commandLogEntry.startTime - commandLogEntry.requestTime} ms
+        </td>
+        <td>
+          {commandLogEntry.endTime - commandLogEntry.startTime} ms
+        </td>
+        <td>
+          {renderObject(commandLogEntry.error)}
+        </td>
       </tr>
     ));
   }

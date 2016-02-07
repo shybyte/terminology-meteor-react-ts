@@ -57,7 +57,6 @@ class EntityListComponent extends MeteorDataComponent<EntityListProps, EntityLis
           return swap(f, f2 => {
             f2.values = _.intersection(f.values, getDescendantPickListItems(pickList).map(pi => pi.name));
           });
-          return f;
         } else {
           return null;
         }

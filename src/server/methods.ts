@@ -17,7 +17,9 @@ function executeNextCommandInQueue() {
         CommandLog.update(command._id, {
           $set: {
             endTime: Date.now(),
-            error: error
+            error: {
+              message: error.message
+            }
           }
         });
       } catch (errorWhileSavingErrorLog) {
