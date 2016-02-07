@@ -16,7 +16,7 @@ class CommandLogComponentClass extends MeteorDataComponent<{}, {}, CommandLogDat
   }
 
   getActiveColumns() {
-    return ['Request Time', 'Command', 'Arguments', 'Queueing Duration', 'Duration', 'Error'];
+    return ['Request Time', 'Command', 'Arguments', 'Queuing Duration', 'Duration', 'Error'];
   }
 
   componentWillMount() {
