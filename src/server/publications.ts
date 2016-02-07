@@ -32,3 +32,10 @@ Meteor.publish(PUBLICATIONS.dataCategories, () => DataCategories.find({}));
 
 Meteor.publish(PUBLICATIONS.pickLists, () => PickLists.find({}));
 
+Meteor.publish(PUBLICATIONS.commandLog, () => CommandLog.find({},
+  {
+    sort: {requestTime: -1},
+    limit: 20
+  })
+);
+

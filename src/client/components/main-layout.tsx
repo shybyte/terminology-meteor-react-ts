@@ -26,6 +26,7 @@ class MainLayout extends React.Component<{content: any}, {}> {
                 {navItem(ROUTE_NAMES.conceptCreate, 'New Concept')}
                 {navItem(ROUTE_NAMES.fieldList, 'Fields')}
                 {navItem(ROUTE_NAMES.pickListOverview, 'Pick Lists')}
+                {navItem(ROUTE_NAMES.commandLog, 'Changes')}
               </ul>
             </nav>
             <main className="col-md-11">

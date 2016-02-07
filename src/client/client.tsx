@@ -14,7 +14,8 @@ const ROUTE_NAMES = {
   fieldList: 'fieldList',
   fieldCreate: 'fieldCreate',
   pickListOverview: 'pickListOverview',
-  pickListEdit: 'pickListEdit'
+  pickListEdit: 'pickListEdit',
+  commandLog: 'commandLog'
 };
 
 function renderEntityList(type: string) {
@@ -91,6 +92,13 @@ FlowRouter.route('/picklists', {
   name: ROUTE_NAMES.pickListOverview,
   action() {
     ReactLayout.render(MainLayout, {content: <PickListOverview />});
+  }
+});
+
+FlowRouter.route('/command-log', {
+  name: ROUTE_NAMES.commandLog,
+  action() {
+    ReactLayout.render(MainLayout, {content: <CommandLogComponent />});
   }
 });
 

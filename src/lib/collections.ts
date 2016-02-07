@@ -81,10 +81,20 @@ const TERMS_REFERENCE = Object.freeze({
   inherit: true,
 });
 
+interface CommandLogEntry extends MongoDBObject {
+  command: string;
+  arguments: any[];
+  error?: any;
+  requestTime: number;
+  startTime?: number;
+  endTime?: number;
+}
+
 const COLLECTIONS = {
   entities: 'entities',
   dataCategories: 'dataCategories',
-  pickLists: 'pickLists'
+  pickLists: 'pickLists',
+  commandLog: 'commandLog'
 };
 
 const PUBLICATIONS = assign(COLLECTIONS, {
@@ -95,6 +105,7 @@ const PUBLICATIONS = assign(COLLECTIONS, {
 const Entities = new Mongo.Collection<Entity>(COLLECTIONS.entities);
 const DataCategories = new Mongo.Collection<DataCategory>(COLLECTIONS.dataCategories);
 const PickLists = new Mongo.Collection<PickList>(COLLECTIONS.pickLists);
+const CommandLog = new Mongo.Collection<CommandLogEntry>(COLLECTIONS.commandLog);
 
 function minifyEntity(e: {_id: string, name: string}): MiniEntity {
   return {_id: e._id, name: e.name};
@@ -103,6 +114,7 @@ function minifyEntity(e: {_id: string, name: string}): MiniEntity {
 this.Entities = Entities;
 this.DataCategories = DataCategories;
 this.PickLists = PickLists;
+this.CommandLog = CommandLog;
 this.COLLECTIONS = COLLECTIONS;
 this.PUBLICATIONS = PUBLICATIONS;
 this.FIELD_TYPES = FIELD_TYPES;
