@@ -53,12 +53,12 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
   }
 
   getFormAsField(): DataCategory {
-    const name = getRefValue(this, 'name');
+    const name = _.trim(getRefValue(this, 'name'));
     const type = getRefValue(this, 'type');
     const entityType = getRefValue(this, 'entityType');
     const pickListId = getRefValue(this, 'pickListId');
     const multi = type === FIELD_TYPES.PICK_LIST ? getCheckBoxRefValue(this, 'multi') : (type === FIELD_TYPES.REFERENCE);
-    const backwardNameRawValue = getRefValue(this, 'backwardName');
+    const backwardNameRawValue = _.trim(getRefValue(this, 'backwardName'));
     const backwardName = (type === FIELD_TYPES.REFERENCE && backwardNameRawValue) ? backwardNameRawValue : undefined;
     const entityTypes = [entityType];
     return {name, type, pickListId, multi, entityTypes, targetEntityTypes: entityTypes, backwardName, system: false, inherit: false};
@@ -86,6 +86,14 @@ class FieldCreateComponent extends MeteorDataComponent<FieldCreateComponentProps
     }
     if (_.startsWith(newField.name, '_')) {
       this.setState({errorMessage: 'A field name should not start with _ .'});
+      return false;
+    }
+    if (newField.backwardName && newField.backwardName === newField.name) {
+      this.setState({errorMessage: 'Backward name should be different from name.'});
+      return false;
+    }
+    if (newField.backwardName && (_.contains(this.data.existingFieldNames, newField.backwardName) || newField.backwardName === 'language')) {
+      this.setState({errorMessage: 'This Backward name exist already.'});
       return false;
     }
     this.setState({errorMessage: ''});
