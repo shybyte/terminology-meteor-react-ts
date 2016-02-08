@@ -30,6 +30,7 @@ const FieldsFacade = {
       field
     );
     ensureFieldIndex(field);
+    EntitiesFacade.initFieldsForAllEntities(field);
   },
 
   deleteField(_id: string) {
@@ -51,7 +52,6 @@ const FieldsFacade = {
           break;
         default:
           console.error('Unknown field type:  ', field);
-          throw new Error('Unknown field type: ' + field.type);
       }
     } catch (error) {
       console.error(error);

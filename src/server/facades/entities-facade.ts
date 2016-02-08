@@ -112,7 +112,7 @@ function propagateInheritedFields(modifiedEntity: Entity, field: DataCategory, r
     // Remove inherited fields in children
     Entities.update(
       {_id: {$in: removedReferencedEntityIDs}},
-      createUnsetKeysModifier(keysToInherit),
+      createNullingKeysModifier(keysToInherit),
       {multi: true}
     );
   }
@@ -124,7 +124,7 @@ function propagateInheritedFields(modifiedEntity: Entity, field: DataCategory, r
       // unset fields inherited from parent
       Entities.update(
         {_id: modifiedEntity._id},
-        createUnsetKeysModifier(keysToInherit)
+        createNullingKeysModifier(keysToInherit)
       );
     } else {
       // inherit from "parent"
@@ -140,8 +140,16 @@ function propagateInheritedFields(modifiedEntity: Entity, field: DataCategory, r
   }
 }
 
+function createNullingKeysModifier(keys: string[]) {
+  return createInitKeysModifier(keys, null); // $unset did not worked (no reactivity) so we set it to null
+}
+
 function createUnsetKeysModifier(keys: string[]) {
-  return {$set: _.zipObject(keys.map(k => [k, null]))}; // $unset did not worked (no reactivity) so we set it to null
+  return {$unset: _.zipObject(keys.map(k => [k, '']))};
+}
+
+function createInitKeysModifier(keys: string[], value: any) {
+  return {$set: _.zipObject(keys.map(k => [k, value]))};
 }
 
 
@@ -217,8 +225,19 @@ class EntitiesFacade {
     );
   }
 
+  static initFieldsForAllEntities(field: DataCategory) {
+    if (field.type === FIELD_TYPES.REFERENCE || field.type === FIELD_TYPES.PICK_LIST) {
+      const namesToInit = _.compact([field.name, field.backwardName]);
+      Entities.update(
+        {},
+        createInitKeysModifier(namesToInit, []),
+        {multi: true}
+      );
+    }
+  }
+
   static removePickListItem(pickList: PickList, item: PickListItem) {
-    const fields =  DataCategories.find({type: FIELD_TYPES.PICK_LIST, pickListId: pickList._id}).fetch();
+    const fields = DataCategories.find({type: FIELD_TYPES.PICK_LIST, pickListId: pickList._id}).fetch();
     const names = [item.name, ...getDescendantPickListItems(item).map(pi => pi.name)];
     fields.forEach(field => {
       Entities.update(
