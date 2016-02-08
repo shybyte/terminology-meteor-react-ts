@@ -20,17 +20,23 @@ namespace  server {
   function dropIndexes(collection: Mongo.Collection<any>) {
     // This function is only used by test code, not within a method, so we don't
     // interact with the write fence.
-    const rawCollection = collection.rawCollection()
+    const rawCollection = collection.rawCollection();
     const future = new Future();
     rawCollection.dropIndexes(future.resolver());
     future.wait();
-  };
+  }
 
   Meteor.startup(function () {
     return;
      //if (DataCategories.find().count() > 0) {
      //   return;
      //}
+
+    CommandLog._ensureIndex({requestTime: -1});
+
+    dropIndexes(Entities);
+    dropIndexes(DataCategories);
+    dropIndexes(PickLists);
 
     Entities._ensureIndex({_lowercase_name: 1});
     Entities._ensureIndex({name: 1});
