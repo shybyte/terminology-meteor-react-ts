@@ -35,6 +35,7 @@ const FieldsFacade = {
 
   deleteField(_id: string) {
     const field = DataCategories.findOne(_id);
+    DataCategories.remove(_id);
 
     try {
       switch (field.type) {
@@ -58,7 +59,6 @@ const FieldsFacade = {
     }
 
     EntitiesFacade.removeFieldFromAllEntities(field);
-    DataCategories.remove(_id);
   }
 };
 
